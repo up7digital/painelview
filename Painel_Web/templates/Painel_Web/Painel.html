@@ -1,0 +1,30 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'Painel_Web/css/style_modelo_painel.css' %}">
+    <link rel="stylesheet" href="{% static 'Painel_Web/css/style_painel.css' %}">
+
+    <title>Painel de Senhas</title>
+</head>
+
+<body>
+
+    <div id="area-exibicao_senhas">
+        {% include "Painel_Web/partials/template_padrao.html" %}
+    </div>
+
+
+</body>
+
+<script>window.PAINEL_ID = {{ painel.id }}</script>
+<script src="{% static 'js/script.js' %}"></script>
+
+</html>

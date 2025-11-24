@@ -1,0 +1,43 @@
+<!-- Área da senha atual -->
+<div class="area-senha_atual">
+    <div class="senha-atual">
+        <!-- ID para manipulação via JS -->
+        <label id="senha-atual-num" class="senha-atual_exbicao">
+            {% if senha_atual %}{{ senha_atual.senha }}{% else %}-{% endif %}
+        </label>
+    </div>
+
+    <div class="detalhes-atual">
+        <!-- IDs para manipulação via JS -->
+        <p id="senha-atual-local" class="detalhes-atual_local">
+            {% if senha_atual %}Local: {{ senha_atual.local }} {{ senha_atual.numeroLocal }}{% endif %}
+        </p>
+        <p id="senha-atual-prioridade" class="detalhes-atual_prioridade">
+            {% if senha_atual %}{{ senha_atual.prioridade }}{% endif %}
+        </p>
+    </div>
+</div>
+
+{% if painel.audio_campainha %}
+    <audio id="audio-campainha">
+        <source src="{{ painel.audio_campainha.arquivo.url }}" type="audio/mpeg">
+        Seu navegador não suporta áudio.
+    </audio>
+{% else %}
+    <audio id="audio-campainha"></audio>
+{% endif %}
+
+
+<!-- Área do histórico -->
+<div id="area-historico">
+    <label class="label-historico">Histórico</label>
+
+    <ul id="historico-lista" class="historico-lista">
+        {% for item in historico|slice:":6" %}
+            <li class="historico-senhas">
+                <span class="historico-senha_atual">{{ item.senha }}</span>
+                <span class="hist-local">Guichê {{ item.numeroLocal }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+</div>

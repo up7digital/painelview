@@ -1,0 +1,33 @@
+body{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(44, 44, 44);
+    font-family: 'Montserrat', sans-serif;
+}
+
+form{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+select{
+    font-size: 15pt;
+    padding-block: 5px;
+    border-radius: 5px;
+    outline: none;
+    color: #0077ff;
+}
+#btn-acessar_painel{
+    font-size: 15pt;
+    font-weight: bold;
+    outline: none;
+    color: white;
+    background-color: #0077ff;
+    border: none;
+    border-radius: 5px;
+    padding-inline: 30px;
+    padding-block: 5px;
+    cursor: pointer;
+}

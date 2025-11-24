@@ -1,0 +1,89 @@
+h1, h2, p{
+    margin: 0px;
+}
+
+/*ÁREA SENHA ATUAL */
+.area-senha_atual{
+    width: 80%;
+    height: 78vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #ebebeb;
+}
+.senha-atual{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.detalhes-atual{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.senha-atual_exbicao{
+    color: #03394b;
+    font-size: 200pt;
+    font-weight: bold;
+}
+.detalhes-atual_local{
+    font-size: 50pt;
+    font-weight: bold;
+    color: black;
+}
+.detalhes-atual_prioridade{
+    font-size: 30pt;
+    color: black;
+    font-weight: bold;
+}
+
+/*HISTORICO*/
+#area-historico{
+    width: 100%;
+    height: 22vh;
+    background-color: #03394b;
+}
+.label-historico{
+    color: #03394b;
+    background-color: white;
+    font-size: 35pt;
+    font-weight: bold;
+}
+.historico-lista{
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: baseline;
+    align-items: center;
+    overflow: hidden;
+}
+.historico-senhas{
+    width: 100%;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-inline: 1px solid #e0e0e0;
+    margin-block: 0px;
+}
+.historico-senha_atual{
+    font-size: 40pt;
+    font-weight: bold;
+}
+.hist-local{
+    font-size: 30pt;
+    font-weight: bold;
+
+}
+
+
+@keyframes piscar {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.2; }
+}
+
+.piscar {
+    animation: piscar 2s 3;
+}
