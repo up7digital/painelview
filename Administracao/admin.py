@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django import forms
+from django.utils.html import format_html
 from .models import tb_Painel
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from .utils.sga_client import SGAClient
-from .models import tb_Conexoes, tb_Painel
+from .models import tb_Conexoes, tb_Painel, AudioCampainha
 
 @admin.register(tb_Conexoes)
 class ConexoesAdmin(admin.ModelAdmin):
@@ -93,3 +94,26 @@ class PainelAdmin(admin.ModelAdmin):
         css = {
             'all': ('/admin/css/widgets.css',)
         }
+
+
+@admin.register(AudioCampainha)
+class AudioCampainhaAdmin(admin.ModelAdmin):
+
+    readonly_fields = ("preview_audio",)
+
+    def preview_audio(self, obj):
+        """
+        Exibe um player de áudio no Django Admin.
+        """
+        if obj.arquivo:
+            return format_html(
+                f"""
+                <audio controls style="width: 300px; margin-top: 10px;">
+                    <source src="{obj.arquivo.url}" type="audio/mpeg">
+                    Seu navegador não suporta reprodução de áudio.
+                </audio>
+                """
+            )
+        return "Nenhum áudio enviado."
+
+    preview_audio.short_description = "Prévia do áudio"
