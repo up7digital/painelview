@@ -18,15 +18,11 @@ RUN apk update && apk add --no-cache \
 # Cria e ativa ambiente virtual
 RUN python -m venv /env
 
-# Copia os arquivos do projeto para dentro do container
+# Copia o projeto inteiro (raiz -> /app)
 COPY . /app
 
-# Instala as dependências Python no venv
+# Instala dependências
 RUN /env/bin/pip install --upgrade pip && \
     /env/bin/pip install -r requirements.txt
 
-# Expõe porta do Django (para acessar via navegador)
 EXPOSE 8080
-
-# Comando padrão: roda o servidor de desenvolvimento Django
-CMD ["/env/bin/python", "manage.py", "runserver", "0.0.0.0:8080"]
