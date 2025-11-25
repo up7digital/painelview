@@ -22,11 +22,11 @@ RUN python -m venv /env
 COPY . /app
 
 # Instala as dependências Python no venv
-RUN /venv/bin/pip install --upgrade pip && \
-    /venv/bin/pip install -r requirements.txt
+RUN /env/bin/pip install --upgrade pip && \
+    /env/bin/pip install -r requirements.txt
 
 # Expõe porta do Django (para acessar via navegador)
 EXPOSE 8080
 
 # Comando padrão: roda o servidor de desenvolvimento Django
-CMD ["/venv/bin/python", "manage.py", "runserver", "0.0.0.0:8080"]
+CMD ["/env/bin/python", "manage.py", "runserver", "0.0.0.0:8080"]
