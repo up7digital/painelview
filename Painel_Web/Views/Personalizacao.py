@@ -9,7 +9,7 @@ def personalizacao_css(request):
     tema, _ = tb_Personalizacao.objects.get_or_create(id=1)
 
     # Renderiza o template CSS
-    template = loader.get_template("Painel_Web/personalizacao.css")
+    template = loader.get_template("Painel_Web/Personalizacao.css")
     css = template.render({"tema": tema})
 
     return HttpResponse(css, content_type="text/css; charset=utf-8")
