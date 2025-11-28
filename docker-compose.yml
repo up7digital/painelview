@@ -10,9 +10,15 @@ services:
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@email.com
       DJANGO_SUPERUSER_PASSWORD: PainelView
+    volumes:
+      - .:/app
+      - static_volume:/app/static
     command: >
       sh -c "
         /env/bin/python manage.py migrate &&
         /env/bin/python manage.py createsuperuser --noinput || true &&
         /env/bin/python manage.py runserver 0.0.0.0:8080
       "
+
+volumes:
+  static_volume:
