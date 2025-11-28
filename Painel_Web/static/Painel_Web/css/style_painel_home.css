@@ -1,16 +1,27 @@
 body{
+    font-family: 'Montserrat', sans-serif;
+    margin: 0px;
+}
+#main-painel_home{
+    width: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: rgb(44, 44, 44);
-    font-family: 'Montserrat', sans-serif;
+    background-color: #002430;
 }
-
+.title{
+    color: white;
+}
 form{
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+    border: 2px solid white;
+    border-radius: 5px;
+    padding: 50px;
 }
 select{
     font-size: 15pt;
@@ -18,8 +29,10 @@ select{
     border-radius: 5px;
     outline: none;
     color: #0077ff;
+    text-align: center;
 }
 #btn-acessar_painel{
+    width: 100%;
     font-size: 15pt;
     font-weight: bold;
     outline: none;
@@ -30,4 +43,15 @@ select{
     padding-inline: 30px;
     padding-block: 5px;
     cursor: pointer;
+}
+#btn-acessar_painel:hover{
+    background-color: #03394B;
+    outline: 2px solid white;
+}
+#span-versao{
+    width: 100%;
+    margin-top: 5px;
+    color: white;
+    text-align: center;
+    font-size: 10pt;
 }

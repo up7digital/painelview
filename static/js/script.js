@@ -89,8 +89,22 @@ function atualizarPainel() {
             const elSenha = document.querySelector(".senha-atual_exbicao");
 
             if (data.senha_atual && elSenha) {
+
+                // Atualiza o número da senha
                 elSenha.innerText = data.senha_atual.senha;
 
+                // === ATUALIZAÇÃO DINÂMICA DA COR ===
+                elSenha.classList.remove("color_convencional", "color_prioridade");
+
+                const prioridadeSenha = data.senha_atual.prioridade;
+
+                if (prioridadeSenha === "Normal") {
+                    elSenha.classList.add("color_convencional");
+                } else if (prioridadeSenha === "Prioridade") {
+                    elSenha.classList.add("color_prioridade");
+                }
+
+                // Atualiza local e prioridade textual
                 const local = document.querySelector(".detalhes-atual_local");
                 const prioridade = document.querySelector(".detalhes-atual_prioridade");
 
@@ -103,6 +117,7 @@ function atualizarPainel() {
                 mostrarSenhaComCampainha(elSenha);
             }
 
+            // Atualização do histórico
             if (Array.isArray(data.historico)) {
                 const ulHist = document.querySelector(".historico-lista");
                 ulHist.innerHTML = "";
@@ -119,6 +134,7 @@ function atualizarPainel() {
         })
         .catch(err => console.error("❌ Erro ao buscar dados do painel:", err));
 }
+
 
 
 function mostrarSenhaComCampainha(el) {

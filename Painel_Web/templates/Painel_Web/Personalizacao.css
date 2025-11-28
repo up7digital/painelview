@@ -1,0 +1,6 @@
+.color_convencional{
+  color: {{ tema.convencional|default:"#0250C4" }};
+}
+.color_prioridade{
+    color: {{ tema.prioridade|default:"#C2005a" }};
+}

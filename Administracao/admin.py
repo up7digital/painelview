@@ -1,11 +1,15 @@
 from django.contrib import admin
 from django import forms
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.utils.html import format_html
-from .models import tb_Painel
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from .utils.sga_client import SGAClient
-from .models import tb_Conexoes, tb_Painel, AudioCampainha
+
+from .models import tb_Painel
+from .models import tb_Conexoes, tb_Painel, AudioCampainha, MidiaPainel, ConfigPainel
+
 
 @admin.register(tb_Conexoes)
 class ConexoesAdmin(admin.ModelAdmin):
@@ -117,3 +121,36 @@ class AudioCampainhaAdmin(admin.ModelAdmin):
         return "Nenhum áudio enviado."
 
     preview_audio.short_description = "Prévia do áudio"
+
+
+
+@admin.register(MidiaPainel)
+class MidiaPainelAdmin(admin.ModelAdmin):
+    list_display = ("arquivo", "tipo", "ordem", "ativo")
+    list_filter = ("tipo", "ativo")
+    search_fields = ("arquivo",)
+    ordering = ("ordem",)
+
+
+@admin.register(ConfigPainel)
+class ConfigPainelAdmin(admin.ModelAdmin):
+
+    def has_add_permission(self, request):
+        # Permite criar apenas se não existir nenhum
+        return not ConfigPainel.objects.exists()
+
+    def changelist_view(self, request, extra_context=None):
+        qs = ConfigPainel.objects.all()
+
+        # Se já existe um registro, vai direto para edição
+        if qs.exists():
+            obj = qs.first()
+
+            url = reverse(
+                f"admin:{self.model._meta.app_label}_{self.model._meta.model_name}_change",
+                args=[obj.pk],
+            )
+            return HttpResponseRedirect(url)
+
+        # Se não existe, mostra a tela de criação normalmente
+        return super().changelist_view(request, extra_context)

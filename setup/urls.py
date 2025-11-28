@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 #-------------------------------------------------
 
 from Administracao.views import ajax_carregar_unidades, ajax_carregar_servicos
-from Painel_Web.views import SelecionarPainelView, PainelView, mercure_proxy, painel_dados
+from Painel_Web.views import SelecionarPainelView, PainelView, mercure_proxy, painel_dados, personalizacao_css
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -16,6 +16,7 @@ urlpatterns = [
     path('ajax/carregar-unidades/', ajax_carregar_unidades, name='ajax_carregar_unidades'),
     path('ajax/carregar-servicos/', ajax_carregar_servicos, name='ajax_carregar_servicos'),
 
+    path('Personalizacao.css', personalizacao_css, name='personalizacao_css'),
 
 ]
 if settings.DEBUG:

@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="{% url 'personalizacao_css' %}">
     <link rel="stylesheet" href="{% static 'Painel_Web/css/style_modelo_painel.css' %}">
     <link rel="stylesheet" href="{% static 'Painel_Web/css/style_painel.css' %}">
 
@@ -26,5 +27,8 @@
 
 <script>window.PAINEL_ID = {{ painel.id }}</script>
 <script src="{% static 'js/script.js' %}"></script>
+<script src="{% static 'js/mecanismos_interacao.js' %}"></script>
+<script>const TEMPO_IMAGEM = {{ config.tempo_exibicao_imagem|default:5 }} * 1000;</script>
+
 
 </html>

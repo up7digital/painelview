@@ -15,21 +15,26 @@
     <title>Painel Home</title>
 </head>
 <body>
-    <h2>Selecione um Painel</h2>
-
-    <form method="get" action="{% url 'exibir_painel' %}">
-        <select name="painel" required>
-            <option value="">-- Escolher um painel --</option>
-            {% for painel in paineis %}
+    <main id="main-painel_home">
+        <h2 class="title">
+            <img src={% static 'Painel_Web/img/doce-natal.png' %} style="height: 35px">
+            Selecione um Painel
+            <img src={% static 'Painel_Web/img/doce-natal.png' %} style="height: 35px">
+        </h2>
+        
+        <form method="get" action="{% url 'exibir_painel' %}">
+            <select name="painel" required>
+                <option value="">-- Escolher um painel --</option>
+                {% for painel in paineis %}
                 <option value="{{ painel.id }}">{{ painel.nome }}</option>
-            {% endfor %}
-        </select>
-
-        <br>
-        <button type="submit" id="btn-acessar_painel">Acessar</button>
-    </form>
-
-
+                {% endfor %}
+            </select>
+            
+            <br>
+            <button type="submit" id="btn-acessar_painel">Acessar</button>
+        </form>
+        <span id="span-versao">Versão 1.0.2</span>
+    </main>
 </body>
 
 </html>

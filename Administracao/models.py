@@ -1,6 +1,7 @@
 import os
 from django.db import models
 from django.db.models import JSONField
+from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 
 class tb_Conexoes(models.Model):
@@ -76,3 +77,66 @@ class tb_Painel(models.Model):
 
     def __str__(self):
         return f"{self.nome} ({self.get_status_display()})"
+    
+# ----------------------------------------------------------------------------------------------------------------
+class tb_Personalizacao(models.Model):
+    convencional = models.CharField(
+        max_length=7, default='#0250C4', validators=[RegexValidator(regex=r'^#[0-9A-Fa-f]{6}$')],
+        verbose_name='Cor da fonte Convencional'
+    )
+    prioridade = models.CharField(
+        max_length=7, default="#FF0000", validators=[RegexValidator(regex=r'^#[0-9A-Fa-f]{6}$')],
+        verbose_name='Cor da fonte Prioridade'
+    )
+
+
+# UPLOAD MÍDEAS --------------------------------------------------------------------------------------------------------------
+
+
+# ------- VALIDADORES -------
+
+def validar_tamanho_arquivo(arquivo):
+    limite_mb = 50
+    if arquivo.size > limite_mb * 1024 * 1024:
+        raise ValidationError(f"O arquivo excede o limite de {limite_mb}MB.")
+
+def validar_extensao_arquivo(arquivo):
+    ext = os.path.splitext(arquivo.name)[1].lower()
+    extensoes_permitidas = [
+        ".png", ".jpg", ".jpeg", ".webp",  # imagens
+        ".mp4", ".mov"                    # vídeos
+    ]
+    if ext not in extensoes_permitidas:
+        raise ValidationError("Extensão inválida. Envie imagens (png/jpg/webp) ou vídeos (mp4/mov).")
+
+# ------- MODEL -------
+
+class MidiaPainel(models.Model):
+
+    TIPOS = (
+        ("Imagem", "Imagem"),
+        ("Vídeo", "Vídeo"),
+    )
+
+    tipo = models.CharField(max_length=10, choices=TIPOS)
+    arquivo = models.FileField(
+        upload_to="midias_painel/",
+        validators=[validar_tamanho_arquivo, validar_extensao_arquivo],
+    )
+    ordem = models.PositiveIntegerField(default=0)
+    ativo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.arquivo or 'Midia'} ({self.tipo})"
+    
+
+class ConfigPainel(models.Model):
+    tempo_exibicao_imagem = models.PositiveIntegerField(
+        default=5, help_text="Tempo em segundos que cada imagem ficará na tela"
+    )
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Configuração {self.id}"
+
+

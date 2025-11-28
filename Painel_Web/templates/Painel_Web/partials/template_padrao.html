@@ -1,32 +1,67 @@
-<!-- Área da senha atual -->
-<div class="area-senha_atual">
-    <div class="senha-atual">
-        <!-- ID para manipulação via JS -->
-        <label id="senha-atual-num" class="senha-atual_exbicao">
-            {% if senha_atual %}{{ senha_atual.senha }}{% else %}-{% endif %}
-        </label>
-    </div>
-
-    <div class="detalhes-atual">
-        <!-- IDs para manipulação via JS -->
-        <p id="senha-atual-local" class="detalhes-atual_local">
-            {% if senha_atual %}Local: {{ senha_atual.local }} {{ senha_atual.numeroLocal }}{% endif %}
-        </p>
-        <p id="senha-atual-prioridade" class="detalhes-atual_prioridade">
-            {% if senha_atual %}{{ senha_atual.prioridade }}{% endif %}
-        </p>
-    </div>
-</div>
+{% load static %}
 
 {% if painel.audio_campainha %}
     <audio id="audio-campainha">
         <source src="{{ painel.audio_campainha.arquivo.url }}" type="audio/mpeg">
         Seu navegador não suporta áudio.
     </audio>
-{% else %}
+    {% else %}
     <audio id="audio-campainha"></audio>
-{% endif %}
+    {% endif %}
 
+<div class="bloco1">
+    
+    <!-- Área da senha atual -->
+    <div class="area-senha_atual">
+        <div class="senha-atual">
+            <label id="senha-atual-num"
+                class="senha-atual_exbicao 
+                {% if senha_atual and senha_atual.prioridade == 'Normal' %}
+                color_convencional
+                {% elif senha_atual and senha_atual.prioridade == 'Prioridade' %}
+                color_prioridade
+                {% endif %}">
+                {% if senha_atual %}{{ senha_atual.senha }}{% else %}-{% endif %}
+            </label>
+        </div>
+        
+        <div class="detalhes-atual">
+            <!-- IDs para manipulação via JS -->
+            <p id="senha-atual-local" class="detalhes-atual_local">
+                {% if senha_atual %}Local: {{ senha_atual.local }} {{ senha_atual.numeroLocal }}{% endif %}
+            </p>
+            <p id="senha-atual-prioridade" class="detalhes-atual_prioridade {% if senha_atual and senha_atual.prioridade == 'Normal' %}
+            color_convencional
+            {% elif senha_atual and senha_atual.prioridade == 'Prioridade' %}
+                color_prioridade
+            {% endif %}">
+            {% if senha_atual %}{{ senha_atual.prioridade }}{% endif %}
+            </p>
+            
+        </div>
+    </div>
+
+    <!-- Painel lateral -->
+    <div id="painel-lateral">
+        <div id="slide-container">
+
+            {% for m in midias %}
+                <div class="slide-item">
+                    {% if m.tipo == "Imagem" %}
+                        <img src="{{ m.arquivo.url }}" class="slide-media">
+                    {% elif m.tipo == "Vídeo" %}
+                        <video class="slide-media" autoplay muted loop>
+                            <source src="{{ m.arquivo.url }}" type="video/mp4">
+                        </video>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+
+</div>
 
 <!-- Área do histórico -->
 <div id="area-historico">
@@ -41,3 +76,4 @@
         {% endfor %}
     </ul>
 </div>
+

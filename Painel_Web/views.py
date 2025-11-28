@@ -12,8 +12,10 @@ from django.views.generic import TemplateView
 from django.template.loader import render_to_string
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 
-from Administracao.models import tb_Painel, tb_Conexoes
+from Administracao.models import tb_Painel, tb_Conexoes, MidiaPainel, ConfigPainel
 from Administracao.utils.sga_client import SGAClient
+
+from .Views.Personalizacao import personalizacao_css
 
 class SelecionarPainelView(TemplateView):
     template_name = "Painel_Web/Painel_Home.html"
@@ -35,6 +37,8 @@ class PainelView(TemplateView):
         sga = SGAClient(painel.conexao)
         servicos_ids = painel.servicos_sga or []
         unidade_id = painel.unidade_sga
+        midias = MidiaPainel.objects.filter(ativo=True).order_by("ordem")
+        config = ConfigPainel.objects.first()
 
         try:
             dados = sga.buscar_painel(unidade_id, servicos_ids)
@@ -48,6 +52,8 @@ class PainelView(TemplateView):
 
             context["senha_atual"] = estado["senha_atual"]
             context["historico"] = estado["historico"]
+            context["midias"] = midias
+            context["config"] = config
 
         except Exception as e:
             print("❌ Erro ao consultar painel:", e)
