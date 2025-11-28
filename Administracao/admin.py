@@ -1,6 +1,7 @@
-from django.contrib import admin
 from django import forms
+from django.db import models
 from django.urls import reverse
+from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.utils.html import format_html
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -10,11 +11,22 @@ from .utils.sga_client import SGAClient
 from .models import tb_Painel
 from .models import tb_Conexoes, tb_Painel, AudioCampainha, MidiaPainel, ConfigPainel
 
+from .forms import ConexoesForm
+
+@admin.register(MidiaPainel)
+class MidiaPainelAdmin(admin.ModelAdmin):
+    list_display = ("arquivo", "tipo", "ordem", "ativo")
+    list_filter = ("tipo", "ativo")
+    search_fields = ("arquivo",)
+    ordering = ("ordem",)
+
 
 @admin.register(tb_Conexoes)
 class ConexoesAdmin(admin.ModelAdmin):
+    form = ConexoesForm
     list_display = ["nome_conexao"]
     search_fields = ["nome_conexao"]
+
 
 
 class PainelForm(forms.ModelForm):
@@ -86,20 +98,6 @@ class PainelForm(forms.ModelForm):
             except Exception as e:
                 print("Erro ao consultar SGA:", e)
 
-
-@admin.register(tb_Painel)
-class PainelAdmin(admin.ModelAdmin):
-    form = PainelForm
-
-    # 5. INCLUSÃO CRUCIAL: Adiciona o JS/CSS para o FilteredSelectMultiple funcionar
-    class Media:
-        # Pega a mídia do widget FilteredSelectMultiple
-        js = ('/admin/js/core.js', '/admin/js/SelectBox.js', '/admin/js/SelectFilter2.js',)
-        css = {
-            'all': ('/admin/css/widgets.css',)
-        }
-
-
 @admin.register(AudioCampainha)
 class AudioCampainhaAdmin(admin.ModelAdmin):
 
@@ -123,13 +121,18 @@ class AudioCampainhaAdmin(admin.ModelAdmin):
     preview_audio.short_description = "Prévia do áudio"
 
 
+@admin.register(tb_Painel)
+class PainelAdmin(admin.ModelAdmin):
+    form = PainelForm
 
-@admin.register(MidiaPainel)
-class MidiaPainelAdmin(admin.ModelAdmin):
-    list_display = ("arquivo", "tipo", "ordem", "ativo")
-    list_filter = ("tipo", "ativo")
-    search_fields = ("arquivo",)
-    ordering = ("ordem",)
+    # 5. INCLUSÃO CRUCIAL: Adiciona o JS/CSS para o FilteredSelectMultiple funcionar
+    class Media:
+        # Pega a mídia do widget FilteredSelectMultiple
+        js = ('/admin/js/core.js', '/admin/js/SelectBox.js', '/admin/js/SelectFilter2.js',)
+        css = {
+            'all': ('/admin/css/widgets.css',)
+        }
+
 
 
 @admin.register(ConfigPainel)
