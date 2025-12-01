@@ -1,6 +1,8 @@
+import os
+
 from pathlib import Path
 from dotenv import load_dotenv
-import os
+
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,6 +12,8 @@ SECRET_KEY = 'django-insecure--l!d**4#k)jky_s#&v7#sa4$xx93@4$0i2_1lpuz=33%dod*eg
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'seuprojeto.settings')
 
 CSRF_TRUSTED_ORIGINS = [
     "https://painelsga.huufma.br",
@@ -23,9 +27,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'Administracao',
     'Painel_Web',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -55,6 +61,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'setup.wsgi.application'
+ASGI_APPLICATION = 'setup.asgi.application'
 
 
 # Database
@@ -99,7 +106,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 

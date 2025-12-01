@@ -13,17 +13,6 @@ services:
     volumes:
       - .:/app
       - static_volume:/app/static
-    command: >
-      sh -c "
-        /env/bin/python manage.py migrate &&
-        /env/bin/python manage.py createsuperuser --noinput || true &&
-        /env/bin/gunicorn PainelView.wsgi:application
-          --bind 0.0.0.0:8080
-          --workers 3
-          --worker-class gevent
-          --timeout 0
-          --keep-alive 65
-      "
 
 volumes:
   static_volume:

@@ -7,6 +7,7 @@ WORKDIR /app
 # Instalações essenciais para compilar pacotes Python comuns
 RUN apk update && apk add --no-cache \
     bash \
+    curl \
     build-base \
     libffi-dev \
     python3-dev \
@@ -22,20 +23,16 @@ RUN python -m venv /env
 COPY . /app
 COPY entrypoint.sh /app/entrypoint.sh
 
+# Ajusta permissões do entrypoint
+RUN chmod +x /app/entrypoint.sh
+
 # Instala dependências
 RUN /env/bin/pip install --upgrade pip && \
     /env/bin/pip install -r requirements.txt && \
     /env/bin/pip install gunicorn gevent
-    chmod +x /app/entrypoint.sh
 
+# Expondo a porta
 EXPOSE 8080
 
-# Comando padrão: iniciar Gunicorn usando gevent
-CMD ["/env/bin/gunicorn", "setup.wsgi:application", \
-     "--bind", "0.0.0.0:8080", \
-     "--workers", "3", \
-     "--worker-class", "gevent", \
-     "--timeout", "0", \
-     "--keep-alive", "65"]
-     
+# Entry point para rodar migrations, collectstatic e gunicorn
 ENTRYPOINT ["/app/entrypoint.sh"]

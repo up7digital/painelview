@@ -135,8 +135,6 @@ function atualizarPainel() {
         .catch(err => console.error("❌ Erro ao buscar dados do painel:", err));
 }
 
-
-
 function mostrarSenhaComCampainha(el) {
 
     // Tocar campainha
