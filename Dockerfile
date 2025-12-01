@@ -23,6 +23,15 @@ COPY . /app
 
 # Instala dependências
 RUN /env/bin/pip install --upgrade pip && \
-    /env/bin/pip install -r requirements.txt
+    /env/bin/pip install -r requirements.txt && \
+    /env/bin/pip install gunicorn gevent
 
 EXPOSE 8080
+
+# Comando padrão: iniciar Gunicorn usando gevent
+CMD ["/env/bin/gunicorn", "PainelView.wsgi:application", \
+     "--bind", "0.0.0.0:8080", \
+     "--workers", "3", \
+     "--worker-class", "gevent", \
+     "--timeout", "0", \
+     "--keep-alive", "65"]
