@@ -11,12 +11,17 @@ SECRET_KEY = 'django-insecure--l!d**4#k)jky_s#&v7#sa4$xx93@4$0i2_1lpuz=33%dod*eg
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", "web_app"]
+ALLOWED_HOSTS = ["https://painelsga.huufma.br", "painelsga.huufma.br", "localhost", "127.0.0.1", "web_app"]
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'seuprojeto.settings')
 
 CSRF_TRUSTED_ORIGINS = [
+    "http://painelsga.huufma.br",
     "https://painelsga.huufma.br",
+    "http://10.16.0.2",
+    "https://10.16.0.2",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
 ]
 
 

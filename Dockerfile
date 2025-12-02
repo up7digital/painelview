@@ -27,6 +27,3 @@ RUN /env/bin/pip install --upgrade pip && \
     /env/bin/pip install gunicorn
 
 EXPOSE 8080
-
-# Comando default para iniciar com Gunicorn
-#CMD ["/env/bin/gunicorn", "setup.wsgi:application", "--bind", "0.0.0.0:8080", "--workers", "3", "--threads", "2"]
