@@ -11,7 +11,7 @@ SECRET_KEY = 'django-insecure--l!d**4#k)jky_s#&v7#sa4$xx93@4$0i2_1lpuz=33%dod*eg
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", "web_app"]
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'seuprojeto.settings')
 
@@ -101,16 +101,14 @@ USE_TZ = True
 
 # STATIC FILES
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-if DEBUG:
-    STATICFILES_DIRS = [
-        BASE_DIR / 'static',
-    ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # MEDIA FILES
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

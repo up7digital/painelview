@@ -11,8 +11,8 @@ services:
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
-    expose:
-      - "8080"
+    ports:
+      - "8080:8080"
 
   nginx:
     image: nginx:stable
