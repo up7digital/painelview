@@ -26,8 +26,5 @@ RUN /env/bin/pip install --upgrade pip && \
     /env/bin/pip install -r requirements.txt && \
     /env/bin/pip install gunicorn
 
-# Expõe a porta que o Gunicorn vai usar
-EXPOSE 8080
-
 # Comando default para iniciar com Gunicorn
 CMD ["/env/bin/gunicorn", "setup.wsgi:application", "--bind", "0.0.0.0:8080", "--workers", "3", "--threads", "2"]
