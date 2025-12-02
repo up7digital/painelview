@@ -12,7 +12,10 @@ services:
       DJANGO_SUPERUSER_PASSWORD: PainelView
     volumes:
       - .:/app
-      - static_volume:/app/static
-
-volumes:
-  static_volume:
+    command: >
+      sh -c "
+        /env/bin/python manage.py migrate &&
+        /env/bin/python manage.py createsuperuser --noinput || true &&
+        /env/bin/python manage.py collectstatic --noinput &&
+        /env/bin/gunicorn setup.wsgi:application --bind 0.0.0.0:8080 --workers 3 --threads 2 --reload
+      "
