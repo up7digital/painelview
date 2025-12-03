@@ -23,7 +23,6 @@ COPY . /app
 
 # Instala dependências
 RUN /env/bin/pip install --upgrade pip && \
-    /env/bin/pip install -r requirements.txt && \
-    /env/bin/pip install gunicorn
+    /env/bin/pip install -r requirements.txt
 
 EXPOSE 8080

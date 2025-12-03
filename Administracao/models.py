@@ -8,7 +8,7 @@ class tb_Conexoes(models.Model):
     nome_conexao = models.CharField("Nome da conexão", max_length=100)
     url_origem = models.URLField("URL do SGA", max_length=255)
     ip_mercure = models.GenericIPAddressField("IP do Mercure", protocol="IPv4", help_text="Normalmente é o mesmo do servidor hospedado o SGA")
-    porta_mercure = models.IntegerField("Porta do Mercure", max_length=5, default=3000)
+    porta_mercure = models.IntegerField("Porta do Mercure", default=3000)
     user_sga = models.CharField("User SGA", max_length=200)
     pass_sga = models.CharField("Senha SGA", max_length=200)
     client_id = models.CharField("Client ID SGA", max_length=200)
