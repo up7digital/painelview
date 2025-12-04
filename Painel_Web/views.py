@@ -1,4 +1,5 @@
 import time
+import json
 import requests
 import socket
 import requests
@@ -143,47 +144,101 @@ def processar_regras(painel_id, senha_atual_api):
 
 
 def mercure_proxy(request, painel_id):
+    print("\n\n🟦🟦🟦 INÍCIO mercure_proxy() 🟦🟦🟦")
+    print(f"📌 Requisição recebida. Painel ID = {painel_id}")
+    print(f"📌 Método = {request.method} | User = {request.user}")
+
     painel = get_object_or_404(tb_Painel, id=painel_id)
     conexao = painel.conexao
 
-    # usa diretamente o IP informado na tabela
     resolved_ip = conexao.ip_mercure
     porta = conexao.porta_mercure
 
     print(f"🌐 Conectando ao Mercure em: {resolved_ip}:{porta}")
 
-    # Monta URL real do Mercure
     mercure_url = f"http://{resolved_ip}:{porta}/.well-known/mercure"
-
-    # Tópico do SGA
     topic = f"/unidades/{painel.unidade_sga}/painel"
-
-    # URL completa para SSE
     full_url = f"{mercure_url}?topic={topic}"
-    print("🔗 URL final:", full_url)
 
-    headers = {"Accept": "text/event-stream"}
+    print(f"🔗 URL final de conexão SSE:\n    {full_url}")
+    print(f"📌 Topic usado: {topic}")
+    print("📌 Headers enviados:", {"Accept": "text/event-stream"})
 
     try:
-        resp = requests.get(full_url, stream=True, timeout=(5, None), headers=headers)
+        resp = requests.get(
+            full_url,
+            stream=True,
+            timeout=(5, None),
+            headers={"Accept": "text/event-stream"},
+        )
+        print("🟢 Conexão Mercure OK. Status:", resp.status_code)
+        print("📩 Headers da resposta Mercure:", resp.headers)
+
         resp.raise_for_status()
+
+    except requests.exceptions.Timeout:
+        print("⏰ ERRO: Timeout ao conectar no Mercure!")
+        return HttpResponse("Timeout Mercure", status=504)
+
+    except requests.exceptions.ConnectionError as e:
+        print("🔌 ERRO DE CONEXÃO Mercure:", e)
+        return HttpResponse("Erro de conexão", status=502)
+
     except Exception as e:
-        print("❌ ERRO AO CONECTAR MERCURE:", e)
+        print("❌ ERRO GENÉRICO AO CONECTAR MERCURE:", e)
         return HttpResponse("Erro ao conectar Mercure", status=500)
 
-    client = sseclient.SSEClient(resp)
+    print("🟢 Criando SSEClient...")
+
+    try:
+        client = sseclient.SSEClient(resp)
+        print("🟢 SSEClient criado com sucesso.")
+    except Exception as e:
+        print("🔥 ERRO ao inicializar SSEClient:", e)
+        return HttpResponse("Erro SSE interno", status=500)
+
+    # --------- STREAM DE EVENTOS ----------
+    print("📡 Iniciando event_stream()... aguardando eventos.\n")
 
     def event_stream():
-        for event in client.events():
-            data = event.data.strip()
-            if data:
+        try:
+            for event in client.events():
+                print("📨 RECEBIDO EVENTO BRUTO DO MERCURE:")
+                print(f"    EVENT.id      = {event.id}")
+                print(f"    EVENT.event   = {event.event}")
+                print(f"    EVENT.data    = {event.data!r}")
+                print("------------------------------------------------")
+
+                data = (event.data or "").strip()
+
+                if not data:
+                    print("⚠️ Evento vazio recebido, ignorando.")
+                    continue
+
+                # Verifica se é JSON válido
+                try:
+                    json.loads(data)
+                    print("🟢 JSON válido recebido.")
+                except Exception as e:
+                    print("❌ JSON INVÁLIDO RECEBIDO:", data)
+                    print("   Erro:", e)
+
+                # Envia ao navegador
+                print("➡️ Enviando evento ao navegador...\n")
                 yield f"data: {data}\n\n".encode("utf-8")
+
+        except GeneratorExit:
+            print("🔻 Cliente desconectou do SSE.")
+        except Exception as e:
+            print("🔥 ERRO durante leitura de eventos SSE:", e)
+        finally:
+            print("🔚 Finalizando stream SSE.\n\n")
 
     return StreamingHttpResponse(
         event_stream(),
         content_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",  # evita buffering no nginx
+            "X-Accel-Buffering": "no",
         },
     )
