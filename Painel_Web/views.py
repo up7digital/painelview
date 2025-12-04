@@ -201,8 +201,22 @@ def mercure_proxy(request, painel_id):
     print("📡 Iniciando event_stream()... aguardando eventos.\n")
 
     def event_stream():
+        print("📡 [event_stream] Iniciado...")
+
+        # 🔵 1) KEEP-ALIVE A CADA 15s SE NINGUÉM ENVIAR EVENTO
+        last_event = time.time()
+        KEEPALIVE_INTERVAL = 15  # segundos
+
         try:
             for event in client.events():
+
+                # Se passou muito tempo sem evento → envia ping
+                now = time.time()
+                if now - last_event > KEEPALIVE_INTERVAL:
+                    print("🔵 Enviando KEEP-ALIVE (ping)...")
+                    yield b": keep-alive\n\n"
+                    last_event = now
+
                 print("📨 RECEBIDO EVENTO BRUTO DO MERCURE:")
                 print(f"    EVENT.id      = {event.id}")
                 print(f"    EVENT.event   = {event.event}")
@@ -210,29 +224,29 @@ def mercure_proxy(request, painel_id):
                 print("------------------------------------------------")
 
                 data = (event.data or "").strip()
-
                 if not data:
                     print("⚠️ Evento vazio recebido, ignorando.")
                     continue
 
-                # Verifica se é JSON válido
+                # Valida JSON
                 try:
                     json.loads(data)
                     print("🟢 JSON válido recebido.")
                 except Exception as e:
-                    print("❌ JSON INVÁLIDO RECEBIDO:", data)
+                    print("❌ JSON INVÁLIDO:", data)
                     print("   Erro:", e)
 
-                # Envia ao navegador
-                print("➡️ Enviando evento ao navegador...\n")
+                print("➡️ Enviando EVENTO REAL ao navegador...\n")
+                last_event = time.time()
                 yield f"data: {data}\n\n".encode("utf-8")
 
         except GeneratorExit:
-            print("🔻 Cliente desconectou do SSE.")
+            print("🔻 Cliente fechou o navegador.")
         except Exception as e:
-            print("🔥 ERRO durante leitura de eventos SSE:", e)
+            print("🔥 ERRO SSE:", e)
         finally:
             print("🔚 Finalizando stream SSE.\n\n")
+
 
     return StreamingHttpResponse(
         event_stream(),

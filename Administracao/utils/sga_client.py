@@ -1,6 +1,7 @@
-import requests
+import json
 import time
-
+import requests
+from django.core.cache import cache
 
 class SGAClient:
     def __init__(self, conexao):
@@ -11,8 +12,8 @@ class SGAClient:
         self.password = conexao.pass_sga
 
         # 🔐 Cache do token
-        self._token = None
-        self._token_expira = 0
+        self.cache_token_key = f"sga_token_{conexao.id}"
+        self.cache_exp_key = f"sga_token_exp_{conexao.id}"
 
     # ----------------------------------------------------
     # 🔐 OBTÉM TOKEN via /api/token (OAuth2 Password Grant)
@@ -20,10 +21,14 @@ class SGAClient:
     def _get_token(self):
         agora = time.time()
 
-        # Token ainda válido → usar cache
-        if self._token and agora < self._token_expira:
-            return self._token
+        token = cache.get(self.cache_token_key)
+        expira = cache.get(self.cache_exp_key)
 
+        # Token ainda válido → reutiliza
+        if token and expira and agora < expira:
+            return token
+        
+        # Token expirado → gerando novo
         url = f"{self.base_url}/api/token"
         print("🔎 Endpoint TOKEN:", url)
 
@@ -42,20 +47,18 @@ class SGAClient:
 
         resp = requests.post(url, data=payload, headers=headers)
         resp.raise_for_status()
-
         data = resp.json()
 
         token = data.get("access_token")
         expires = data.get("expires_in", 300)
 
-        if not token:
-            raise ValueError("⚠️ Nenhum token retornado pelo endpoint /api/token")
+        expira_em = agora + expires - 5  # margem de segurança
 
-        # Cacheia token com margem de segurança
-        self._token = token
-        self._token_expira = agora + int(expires) - 5
+        # Salvar token no cache global
+        cache.set(self.cache_token_key, token, timeout=expires)
+        cache.set(self.cache_exp_key, expira_em, timeout=expires)
+        print("🔐 Token gerado/atualizado com SUCESSO (CACHED)")
 
-        print("🔐 Token gerado/atualizado com sucesso")
         return token
 
     # Cabeçalho com Bearer Token

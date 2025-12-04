@@ -16,6 +16,9 @@ ALLOWED_HOSTS = ["https://painelsga.huufma.br", "painelsga.huufma.br", "localhos
 CSRF_TRUSTED_ORIGINS = [
     "http://painelsga.huufma.br",
     "https://painelsga.huufma.br",
+    "http://10.16.0.2",
+    "https://10.16.0.2",
+
 ]
 
 

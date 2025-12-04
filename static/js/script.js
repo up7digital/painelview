@@ -142,22 +142,36 @@ function atualizarPainel() {
                 console.log("✏️ Atualizando senha atual via FETCH...", data.senha_atual);
                 elSenha.innerText = data.senha_atual.senha;
 
+                // ⭐ ATUALIZA A COR DA SENHA PRINCIPAL
+                elSenha.classList.remove("color_convencional", "color_prioridade");
+
+                if (data.senha_atual.prioridade === "Normal") {
+                    elSenha.classList.add("color_convencional");
+                } else if (data.senha_atual.prioridade === "Prioridade") {
+                    elSenha.classList.add("color_prioridade");
+                }
+
+                // Atualiza local e prioridade
                 const local = document.querySelector(".detalhes-atual_local");
                 const prioridade = document.querySelector(".detalhes-atual_prioridade");
 
                 if (local)
                     local.innerText = "Local: " + data.senha_atual.local + " " + data.senha_atual.numeroLocal;
-                else
-                    console.warn("⚠️ LOCAL não encontrado!");
 
-                if (prioridade)
+                if (prioridade) {
                     prioridade.innerText = data.senha_atual.prioridade;
-                else
-                    console.warn("⚠️ PRIORIDADE não encontrada!");
+
+                    // ⭐ ATUALIZA A COR DA PRIORIDADE
+                    prioridade.classList.remove("color_convencional", "color_prioridade");
+
+                    if (data.senha_atual.prioridade === "Normal") {
+                        prioridade.classList.add("color_convencional");
+                    } else if (data.senha_atual.prioridade === "Prioridade") {
+                        prioridade.classList.add("color_prioridade");
+                    }
+                }
 
                 mostrarSenhaComCampainha(elSenha);
-            } else {
-                console.warn("⚠️ Sem senha atual OU '.senha-atual_exbicao' ausente.");
             }
 
             // HISTÓRICO
