@@ -12,7 +12,7 @@ class AdministracaoConfig(AppConfig):
                 tb_Conexoes.objects.create(
                     nome_conexao="Conexão HU",
                     url_origem="https://novosga.huufma.br/",
-                    ip_mercure="10.16.0.8",
+                    ip_mercure="10.16.0.18",
                     porta_mercure=3000,
                     user_sga="adminsga",
                     pass_sga="@d1m1nSg@",
