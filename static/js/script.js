@@ -1,9 +1,8 @@
 let ultimaSenha = null;
+let paginaJaAtualizouPorErro = false;
 
-console.log("======================================");
-console.log("🟦 SCRIPT DO PAINEL INICIADO");
-console.log("PAINEL_ID:", window.PAINEL_ID);
-console.log("======================================");
+
+console.log("===== Versão do Script: 1.1.6 =====");
 
 // 1) INICIAR CONEXÃO COM MERCURE
 console.log("🔌 Iniciando conexão Mercure via proxy...");
@@ -12,8 +11,17 @@ console.log("URL usada:", `/mercure-proxy/${window.PAINEL_ID}/`);
 const evtSource = new EventSource(`/mercure-proxy/${window.PAINEL_ID}/`);
 
 // Evento ao abrir a conexão
-evtSource.onopen = function() {
-    console.log("🟢 SSE CONECTADO com sucesso!");
+evtSource.onerror = function(err) {
+    console.error("🔴 ERRO SSE:", err);
+
+    if (!paginaJaAtualizouPorErro) {
+        paginaJaAtualizouPorErro = true;
+
+        console.warn("🔄 SSE caiu. Atualizando página em 1 segundo...");
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
 };
 
 // Evento de erro
@@ -109,7 +117,7 @@ evtSource.onmessage = function(event) {
             console.error("❌ '.historico-lista' NÃO encontrado!");
         } else {
             ulHist.innerHTML = "";
-            data.historico.slice(0, 7).forEach(item => {
+            data.historico.slice(0, 5).forEach(item => {
                 console.log("➕ Histórico item:", item);
                 const li = document.createElement("li");
                 li.className = "historico-senhas";

@@ -68,7 +68,7 @@
     <label class="label-historico">Histórico</label>
 
     <ul id="historico-lista" class="historico-lista">
-        {% for item in historico|slice:":6" %}
+        {% for item in historico|slice:":5" %}
             <li class="historico-senhas">
                 <span class="historico-senha_atual">{{ item.senha }}</span>
                 <span class="hist-local">Guichê {{ item.numeroLocal }}</span>

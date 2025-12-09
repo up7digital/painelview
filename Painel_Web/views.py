@@ -133,7 +133,7 @@ def processar_regras(painel_id, senha_atual_api):
     # 3) Nova senha → mover a antiga para histórico, remover do histórico se já existir
     historico = [h for h in historico if h["senha"] != senha_api]  # remove nova senha caso já esteja
     historico.insert(0, senha_atual)  # antiga vai para histórico
-    historico = historico[:7]  # limita tamanho
+    historico = historico[:5]  # limita tamanho
 
     estado["senha_atual"] = senha_obj
     estado["historico"] = historico

@@ -21,24 +21,29 @@ h1, h2, p{
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-block: 0px;
 }
 .detalhes-atual{
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-block: 0px;
 }
 .senha-atual_exbicao{
-    font-size: 250pt;
-    font-weight: bold;
+    font-size: 18vw;
+    font-weight: 700;
+    margin-bottom: 0px;
 }
 .detalhes-atual_local{
-    font-size: 60pt;
-    font-weight: bold;
+    font-size: 100pt;
+    font-weight:800;
     color: black;
+    margin-block: 0px;
 }
 .detalhes-atual_prioridade{
-    font-size: 40pt;
-    font-weight: bold;
+    font-size: 80pt;
+    font-weight: 900;
+    margin-block: 0px;
 }
 
 /* ----------------- Painel Lateral ----------------- */
@@ -72,19 +77,20 @@ h1, h2, p{
 
 
 
-
-
-/*HISTORICO*/
+/* ----------------- HISTORICO ----------------- */
 #area-historico{
     width: 100%;
     height: 22vh;
     background-color: #03394b;
+    position:relative;
 }
 .label-historico{
     color: #03394b;
     background-color: white;
     font-size: 35pt;
     font-weight: bold;
+    position: absolute;
+    top: -30px;
 }
 .historico-lista{
     list-style: none;
@@ -93,6 +99,7 @@ h1, h2, p{
     justify-content: baseline;
     align-items: center;
     overflow: hidden;
+    height: 100%;
 }
 .historico-senhas{
     width: 100%;
@@ -103,13 +110,14 @@ h1, h2, p{
     align-items: center;
     border-inline: 1px solid #e0e0e0;
     margin-block: 0px;
+    overflow: hidden;
 }
 .historico-senha_atual{
-    font-size: 40pt;
+    font-size: 65pt;
     font-weight: bold;
 }
 .hist-local{
-    font-size: 30pt;
+    font-size: 40pt;
     font-weight: bold;
 
 }
