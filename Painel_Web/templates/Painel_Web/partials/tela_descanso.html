@@ -1,0 +1,27 @@
+<div id="popup_banner">
+        <div id="slide-container_popup">
+
+            {% for m in midias %}
+                {% if m.exibir_popup == 0 %}
+                    <div class="slide-item_tela_descanso">
+                        {% if m.tipo == "Imagem" %}
+                            <img src="{{ m.arquivo.url }}" class="slide-media">
+
+                        {% elif m.tipo == "Vídeo" %}
+                            <video class="slide-media" autoplay muted loop>
+                                <source src="{{ m.arquivo.url }}" type="video/mp4">
+                            </video>
+
+                         {% elif m.tipo == "Texto" %}
+                            <div class="tela_descanso-slide_texto">
+                                {{ m.texto }}
+                        </div>
+
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+
+        </div>
+    </div>

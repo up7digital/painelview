@@ -2,7 +2,7 @@ let ultimaSenha = null;
 let paginaJaAtualizouPorErro = false;
 
 
-console.log("===== Versão do Script: 1.1.6 =====");
+console.log("===== Versão do Script: 1.2.0 =====");
 
 // 1) INICIAR CONEXÃO COM MERCURE
 console.log("🔌 Iniciando conexão Mercure via proxy...");
@@ -10,32 +10,25 @@ console.log("URL usada:", `/mercure-proxy/${window.PAINEL_ID}/`);
 
 const evtSource = new EventSource(`/mercure-proxy/${window.PAINEL_ID}/`);
 
-// Evento ao abrir a conexão
 evtSource.onerror = function(err) {
     console.error("🔴 ERRO SSE:", err);
+
+    // Se o servidor deu timeout, quebra inevitável
+    if (err && err.target && err.target.readyState === EventSource.CLOSED) {
+        console.warn("🔌 Conexão SSE fechada pelo servidor");
+    }
 
     if (!paginaJaAtualizouPorErro) {
         paginaJaAtualizouPorErro = true;
 
-        console.warn("🔄 SSE caiu. Atualizando página em 1 segundo...");
-        setTimeout(() => {
-            location.reload();
-        }, 1000);
+        console.warn("🔄 Reload por erro SSE...");
+        setTimeout(() => location.reload(), 1500);
     }
 };
 
-// Evento de erro
-evtSource.onerror = function(err) {
-    console.error("🔴 ERRO SSE:", err);
-};
 
 // RECEBEU EVENTO MERCURE
 evtSource.onmessage = function(event) {
-    console.log("======================================");
-    console.log("📨 EVENTO MERCURE RECEBIDO (RAW):", event);
-    console.log("📨 EVENTO MERCURE DATA:", event.data);
-    console.log("======================================");
-
     let data;
     try {
         data = JSON.parse(event.data);
@@ -45,11 +38,9 @@ evtSource.onmessage = function(event) {
         return;
     }
 
-    console.log("🔍 Tipo de evento recebido:", Object.keys(data));
 
     // 1) HTML pronto
     if (data.html) {
-        console.log("📄 HTML recebido → substituindo área de exibição");
         try {
             document.getElementById("area-exibicao_senhas").innerHTML = data.html;
         } catch (err) {
@@ -58,8 +49,9 @@ evtSource.onmessage = function(event) {
 
         const el = document.querySelector(".senha-atual_exbicao");
         if (el) {
-            console.log("🔔 Chamando campainha para HTML...");
             mostrarSenhaComCampainha(el);
+            resetarTimerTelaDescanso();
+
         } else {
             console.warn("⚠️ HTML não contém '.senha-atual_exbicao'");
         }
@@ -68,7 +60,6 @@ evtSource.onmessage = function(event) {
 
     // 2) evento de ID → buscar dados completos
     if (data.id) {
-        console.log("🆔 Evento contém ID. Chamando atualizarPainel()...");
         atualizarPainel();
         return;
     }
@@ -79,27 +70,23 @@ evtSource.onmessage = function(event) {
         return;
     }
 
-    console.log("🔽 Atualizando senha atual:", data.senha_atual);
 
     const elSenha = document.querySelector(".senha-atual_exbicao");
     if (!elSenha) {
         console.error("❌ Elemento .senha-atual_exbicao NÃO encontrado!");
     } else {
-        console.log("✏️ Atualizando elemento da senha atual...");
         elSenha.innerText = data.senha_atual.senha;
 
         const local = document.querySelector(".detalhes-atual_local");
         const prioridade = document.querySelector(".detalhes-atual_prioridade");
 
         if (local) {
-            console.log("📍 Atualizando LOCAL:", data.senha_atual.local, data.senha_atual.numeroLocal);
             local.innerText = "Local: " + data.senha_atual.local + " " + data.senha_atual.numeroLocal;
         } else {
             console.warn("⚠️ '.detalhes-atual_local' NÃO encontrado!");
         }
 
         if (prioridade) {
-            console.log("🏆 Atualizando PRIORIDADE:", data.senha_atual.prioridade);
             prioridade.innerText = data.senha_atual.prioridade;
         } else {
             console.warn("⚠️ '.detalhes-atual_prioridade' NÃO encontrado!");
@@ -110,7 +97,6 @@ evtSource.onmessage = function(event) {
 
     // 4) Atualizar histórico
     if (Array.isArray(data.historico)) {
-        console.log(`📜 Atualizando histórico (${data.historico.length} itens)...`);
 
         const ulHist = document.querySelector(".historico-lista");
         if (!ulHist) {
@@ -118,7 +104,6 @@ evtSource.onmessage = function(event) {
         } else {
             ulHist.innerHTML = "";
             data.historico.slice(0, 5).forEach(item => {
-                console.log("➕ Histórico item:", item);
                 const li = document.createElement("li");
                 li.className = "historico-senhas";
                 li.innerHTML = `
@@ -134,20 +119,16 @@ evtSource.onmessage = function(event) {
 
 // FUNÇÃO DE FETCH COMPLETO
 function atualizarPainel() {
-    console.log("🌐 Iniciando FETCH → /painel-dados/?painel=" + window.PAINEL_ID);
 
     fetch(`/painel-dados/?painel=${window.PAINEL_ID}`)
         .then(r => {
-            console.log("📡 RESPOSTA FETCH (RAW):", r);
             return r.json();
         })
         .then(data => {
-            console.log("🔄 FETCH JSON RECEBIDO:", data);
 
             const elSenha = document.querySelector(".senha-atual_exbicao");
 
             if (data.senha_atual && elSenha) {
-                console.log("✏️ Atualizando senha atual via FETCH...", data.senha_atual);
                 elSenha.innerText = data.senha_atual.senha;
 
                 // ⭐ ATUALIZA A COR DA SENHA PRINCIPAL
@@ -180,11 +161,11 @@ function atualizarPainel() {
                 }
 
                 mostrarSenhaComCampainha(elSenha);
+                resetarTimerTelaDescanso();
             }
 
             // HISTÓRICO
             if (Array.isArray(data.historico)) {
-                console.log("📜 Atualizando histórico via FETCH:", data.historico.length, "itens");
                 const ulHist = document.querySelector(".historico-lista");
                 ulHist.innerHTML = "";
 
@@ -206,8 +187,6 @@ function atualizarPainel() {
 }
 
 function mostrarSenhaComCampainha(el) {
-    console.log("🔔 Executando mostrarSenhaComCampainha");
-    console.log("Elemento recebido:", el);
 
     // Campainha
     const audio = document.getElementById("audio-campainha");
@@ -215,7 +194,6 @@ function mostrarSenhaComCampainha(el) {
     if (!audio) {
         console.warn("⚠️ Nenhum audio encontrado (id='audio-campainha')");
     } else {
-        console.log("🔊 Tocando campainha...");
         audio.currentTime = 0;
         audio.play().catch(err => {
             console.warn("⚠️ Autoplay bloqueado:", err);

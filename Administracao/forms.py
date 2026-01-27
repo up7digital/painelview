@@ -1,5 +1,9 @@
 from django import forms
-from .models import tb_Conexoes
+from .utils.sga_client import SGAClient
+
+
+from .models import MidiaPainel, tb_Conexoes
+
 
 class ConexoesForm(forms.ModelForm):
     class Meta:
@@ -9,3 +13,4 @@ class ConexoesForm(forms.ModelForm):
             "pass_sga": forms.PasswordInput(render_value=True),
             "client_secret": forms.PasswordInput(render_value=True),
         }
+

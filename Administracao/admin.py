@@ -8,25 +8,35 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from .utils.sga_client import SGAClient
 
-from .models import tb_Painel
-from .models import tb_Conexoes, tb_Painel, AudioCampainha, MidiaPainel, ConfigPainel
+from .models import tb_Setores, tb_Conexoes, tb_Painel, AudioCampainha, MidiaPainel, ConfigPainel
 
 from .forms import ConexoesForm
 
+# Setores ===============================================================
+@admin.register(tb_Setores)
+class Setores(admin.ModelAdmin):
+    list_display = ("nome_setor", "status")
+    list_filter = ("nome_setor", "status")
+    search_fields = ("nome_setor",)
+
+
+# Mídeas Painel ===============================================================
 @admin.register(MidiaPainel)
 class MidiaPainelAdmin(admin.ModelAdmin):
-    list_display = ("arquivo", "tipo", "ordem", "ativo")
-    list_filter = ("tipo", "ativo")
+    list_display = ("arquivo", "tipo", "ordem", "ativo", "setor")
+    list_filter = ("tipo", "ativo", "exibir_popup", "setor")
     search_fields = ("arquivo",)
     ordering = ("ordem",)
 
+    class Media:
+        js = ("admin/js/painel_js.js",)
 
+# Conexões ===================================================================
 @admin.register(tb_Conexoes)
 class ConexoesAdmin(admin.ModelAdmin):
     form = ConexoesForm
     list_display = ["nome_conexao"]
     search_fields = ["nome_conexao"]
-
 
 
 class PainelForm(forms.ModelForm):
@@ -98,6 +108,7 @@ class PainelForm(forms.ModelForm):
             except Exception as e:
                 print("Erro ao consultar SGA:", e)
 
+# Gerenciamento das Campainha ===============================================================
 @admin.register(AudioCampainha)
 class AudioCampainhaAdmin(admin.ModelAdmin):
 
@@ -120,7 +131,7 @@ class AudioCampainhaAdmin(admin.ModelAdmin):
 
     preview_audio.short_description = "Prévia do áudio"
 
-
+# Gerenciamento dos Painéis ===============================================================
 @admin.register(tb_Painel)
 class PainelAdmin(admin.ModelAdmin):
     form = PainelForm
@@ -134,26 +145,7 @@ class PainelAdmin(admin.ModelAdmin):
         }
 
 
-
+# Configurações ===============================================================
 @admin.register(ConfigPainel)
 class ConfigPainelAdmin(admin.ModelAdmin):
-
-    def has_add_permission(self, request):
-        # Permite criar apenas se não existir nenhum
-        return not ConfigPainel.objects.exists()
-
-    def changelist_view(self, request, extra_context=None):
-        qs = ConfigPainel.objects.all()
-
-        # Se já existe um registro, vai direto para edição
-        if qs.exists():
-            obj = qs.first()
-
-            url = reverse(
-                f"admin:{self.model._meta.app_label}_{self.model._meta.model_name}_change",
-                args=[obj.pk],
-            )
-            return HttpResponseRedirect(url)
-
-        # Se não existe, mostra a tela de criação normalmente
-        return super().changelist_view(request, extra_context)
+    list_display = ("setor", "atualizado_em")

@@ -25,13 +25,20 @@
         {% include "Painel_Web/partials/template_padrao.html" %}
     </div>
 
+    <div id="area-tela_descanso">
+        {% include "Painel_Web/partials/tela_descanso.html" %}
+    </div>
+
 
 </body>
 
 <script>window.PAINEL_ID = {{ painel.id }}</script>
 <script src="{% static 'js/script.js' %}"></script>
 <script src="{% static 'js/mecanismos_interacao.js' %}"></script>
-<script>const TEMPO_IMAGEM = {{ config.tempo_exibicao_imagem|default:5 }} * 1000;</script>
+<script>
+    const TEMPO_IMAGEM = {{ config.tempo_exibicao_imagem|default:5 }} * 1000;
+    const TEMPO_TELA_DESCANSO = {{ config.tempo_popup|default:10 }} * 1000;
+</script>
 
 <script>
 // Controle de atualização dos slides =================================

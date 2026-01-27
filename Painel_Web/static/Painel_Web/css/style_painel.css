@@ -4,7 +4,7 @@ h1, h2, p{
 
 /*ÁREA SENHA ATUAL */
 .area-senha_atual{
-    width: 80%;
+    flex: 1;
     height: 78vh;
     display: flex;
     flex-direction: column;
@@ -48,7 +48,7 @@ h1, h2, p{
 
 /* ----------------- Painel Lateral ----------------- */
 #painel-lateral{
-    width: 20%;
+    width: 21vw;
     height: 100%;
     overflow: hidden;
     box-shadow: 0px 0px 2pc black;
@@ -70,12 +70,36 @@ h1, h2, p{
     opacity: 1;
 }
 .slide-media {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: cover;
 }
+.slide-texto{
+    width: 98%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+    font-size: 35pt;
+    color: white;
+}
+.tela_descanso-slide_texto{
+    color: white;
+    font-weight: bold;
+    font-size: 40pt;
+    background-color: hsl(0, 0%, 0%, 50%);
 
-
+    width: 100%;
+    height: 100%;
+    padding-inline: 10vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
 
 /* ----------------- HISTORICO ----------------- */
 #area-historico{
@@ -130,4 +154,59 @@ h1, h2, p{
 
 .piscar {
     animation: piscar 2s 3;
+}
+
+
+/* ----------------- TELA DE DESCANSO ----------------- */
+#area-tela_descanso {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    background-color: hsl(195, 92%, 15%, 80%);
+}
+
+#slide-container_popup{
+    width: 100%;
+    height: 100%;
+}
+
+#area-tela_descanso.active {
+    display: block;
+}
+
+#popup_banner{
+    width: 50vw;
+    height: 100%;
+    overflow: hidden;
+}
+
+.slide-item_tela_descanso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    inset: 0;
+    transform: translateX(-100%);
+    transition: transform 0.8s ease-in-out, opacity 0.4s ease-in-out;
+}
+
+.slide-item_tela_descanso.active {
+    transform: translateX(0);
+    opacity: 1;
+    z-index: 2;
+}
+.slide-item_tela_descanso.saindo {
+    transform: translateX(100%);
+    opacity: 0;
+    z-index: 1;
+}
+.slide-media {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    box-shadow: 0px 0px 2pc black;
 }

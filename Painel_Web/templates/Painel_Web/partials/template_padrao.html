@@ -8,9 +8,9 @@
     {% else %}
     <audio id="audio-campainha"></audio>
     {% endif %}
+    
 
 <div class="bloco1">
-    
     <!-- Área da senha atual -->
     <div class="area-senha_atual">
         <div class="senha-atual">
@@ -46,20 +46,31 @@
         <div id="slide-container">
 
             {% for m in midias %}
+            {% if m.exibir_lateral == 0 %}
                 <div class="slide-item">
+
                     {% if m.tipo == "Imagem" %}
                         <img src="{{ m.arquivo.url }}" class="slide-media">
+
                     {% elif m.tipo == "Vídeo" %}
                         <video class="slide-media" autoplay muted loop>
                             <source src="{{ m.arquivo.url }}" type="video/mp4">
                         </video>
+
+                    {% elif m.tipo == "Texto" %}
+                        <div class="slide-texto">
+                            {{ m.texto }}
+                        </div>
+
                     {% endif %}
+
                 </div>
-            {% endfor %}
+            {% endif %}
+        {% endfor %}
+
 
         </div>
     </div>
-
 
 </div>
 

@@ -1,67 +1,77 @@
 import time
 import json
-import requests
 import socket
 import requests
 import sseclient
 from http import client
+from django.views import View
+from django.conf import settings
 from urllib.parse import urlparse
 from django.core.cache import cache
-from django.conf import settings
-from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
+from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 
-from Administracao.models import tb_Painel, tb_Conexoes, MidiaPainel, ConfigPainel
+from Administracao.models import tb_Setores, tb_Painel, tb_Conexoes, MidiaPainel, ConfigPainel
 from Administracao.utils.sga_client import SGAClient
 
 from .Views.Personalizacao import personalizacao_css
 
+# Controles da Home ==========================================================================================
 class SelecionarPainelView(TemplateView):
-    template_name = "Painel_Web/Painel_Home.html"
+    template_name = "Painel_Web/Home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["paineis"] = tb_Painel.objects.filter(status="Ativo").order_by("nome")
+        context["setores"] = tb_Setores.objects.filter(status="Ativo").order_by("nome_setor")
         return context
 
+class SelecionarSetor(View):
+    def get(self, request):
+        setor_id = request.GET.get("setor")
+
+        paineis = (
+            tb_Painel.objects.filter(setor_id=setor_id, status="Ativo").values("id", "nome").order_by("nome")
+        )
+
+        return JsonResponse(list(paineis), safe=False)
+
+# Exibição dos Painéis ==========================================================================================
 class PainelView(TemplateView):
     template_name = "Painel_Web/Painel.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         painel_id = self.request.GET.get("painel")
         painel = get_object_or_404(tb_Painel, id=painel_id)
+
         context["painel"] = painel
+        context["midias"] = MidiaPainel.objects.filter(ativo=True, setor=painel.setor).order_by("ordem")
+        context["config"] = ConfigPainel.objects.first()
+        context["senha_atual"] = None
+        context["historico"] = []
 
         sga = SGAClient(painel.conexao)
         servicos_ids = painel.servicos_sga or []
         unidade_id = painel.unidade_sga
-        midias = MidiaPainel.objects.filter(ativo=True).order_by("ordem")
-        config = ConfigPainel.objects.first()
 
         try:
             dados = sga.buscar_painel(unidade_id, servicos_ids)
-            if not isinstance(dados, list) or not dados:
-                context["senha_atual"] = None
-                context["historico"] = []
-                return context
 
-            senha_atual_api = dados[0]
-            estado = processar_regras(painel_id, senha_atual_api)
+            if isinstance(dados, list) and dados:
+                senha_atual_api = dados[0]
+                estado = processar_regras(painel_id, senha_atual_api)
 
-            context["senha_atual"] = estado["senha_atual"]
-            context["historico"] = estado["historico"]
-            context["midias"] = midias
-            context["config"] = config
+                context["senha_atual"] = estado["senha_atual"]
+                context["historico"] = estado["historico"]
 
         except Exception as e:
             print("❌ Erro ao consultar painel:", e)
-            context["senha_atual"] = None
-            context["historico"] = []
 
         return context
+
 
 def painel_dados(request):
     painel_id = request.GET.get("painel")
