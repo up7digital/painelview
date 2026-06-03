@@ -8,16 +8,16 @@ class AdministracaoConfig(AppConfig):
     def ready(self):
         from .models import tb_Conexoes
         try:
-            if not tb_Conexoes.objects.filter(nome_conexao="Conexão HU").exists():
+            if not tb_Conexoes.objects.filter(nome_conexao="Conexão Principal").exists():
                 tb_Conexoes.objects.create(
-                    nome_conexao="Conexão HU",
-                    url_origem="https://novosga.huufma.br/",
-                    ip_mercure="10.16.0.18",
+                    nome_conexao="Conexão Principal",
+                    url_origem="https://seudns.seudominio.br/",
+                    ip_mercure="IP do mércure",
                     porta_mercure=3000,
-                    user_sga="adminsga",
-                    pass_sga="@d1m1nSg@",
-                    client_id="83cdc6721514aeb8b8616ea7de7a62e7",
-                    client_secret="25c9403ec15d16ffa062eef2a3262eea098aebca7ca2f1119f84603497c1a69a77e6c38052118b44926f35e8215fbc5410c53b631353eb13c7f36baa4c5b9d53",
+                    user_sga="Usuário do GLPI",
+                    pass_sga="Senha do usuário GLPi",
+                    client_id="Client ID do seu GLPI",
+                    client_secret="Client Secret do seu GLPI",
                 )
         except (OperationalError, ProgrammingError):
             pass
