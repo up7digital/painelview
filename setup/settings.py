@@ -7,17 +7,16 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure--l!d**4#k)jky_s#&v7#sa4$xx93@4$0i2_1lpuz=33%dod*eg'
+SECRET_KEY = 'Sua chave aqui'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["https://painelsga.huufma.br", "painelsga.huufma.br", "localhost", "127.0.0.1", "web_app"]
-
+ALLOWED_HOSTS = ["https://seudns.seudominio.br", "http://seudns.seudominio.br", "seudns.seudominio.br", "localhost", "127.0.0.1"]
 CSRF_TRUSTED_ORIGINS = [
-    "http://painelsga.huufma.br",
-    "https://painelsga.huufma.br",
-    "http://10.16.0.2",
-    "https://10.16.0.2",
+    "https://seudns.seudominio.br",
+    "http://seudns.seudominio.br",
+    "http://IP_do_servidor",
+    "https://IP_do_servidor",
 
 ]
 

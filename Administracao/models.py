@@ -81,6 +81,9 @@ class tb_Personalizacao(models.Model):
         verbose_name='Cor da fonte Prioridade'
     )
 
+    cor_texto = models.CharField(max_length=7, default="#ffffff", validators=[RegexValidator(regex=r'^#[0-9A-Fa-f]{6}$')], verbose_name="Cor da fonte do texto")
+    tamanho_texto = models.IntegerField(verbose_name="Tamanho da fonte")
+
 
 # UPLOAD MÍDEAS ======================================================================================================
 # ------- VALIDADORES -------
