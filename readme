@@ -1,5 +1,10 @@
 #Modo de instalação
-- settings.py
+1. Inicie um novo Projeto django
+2. Copie os arquivos do repositório
+3. Crie um ambiente virtual
+4. Instale as dependências: pip install -r requirements.text
+5. no settings.pu preencha as variáveis abaixo de acordo com o seu DNS
+
 SECRET_KEY = 'Sua chave aqui'
 
 ALLOWED_HOSTS = [
@@ -16,3 +21,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://IP_do_servidor",
 
 ]
+
+6. Edite o arquivo Administracao/apps.py com as informaçõs de DNS do Mércure e login de um usuário com permissão elevada do seu GLPi
+7. Rode as migrações: python manage.py migrate
+8. Crie um usuário admin: python manage.py createsuperuser
+9. Rode o Sistema em segundo plano: nohup python manage.py runserver 0.0.0.0:8000 &
