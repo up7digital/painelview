@@ -26,7 +26,3 @@ media/
 # PyCharm
 .idea/
 
-# Docker
-Dockerfile
-docker-compose.yml
-
