@@ -1,47 +1,116 @@
-// Controle dos Slides Lateral ====================================================
-document.addEventListener("DOMContentLoaded", function () {
-    let slides = document.querySelectorAll(".slide-item");
-    let index = 0;
-
-    if (slides.length === 0) return;
-
-    // mostrar o primeiro slide
-    slides[0].classList.add("active");
-
-    setInterval(() => {
-        slides[index].classList.remove("active");
-
-        index = (index + 1) % slides.length;
-
-        slides[index].classList.add("active");
-    }, TEMPO_IMAGEM);  // agora usa o valor vindo do banco!
-});
-
-
-// Controle da Tela de Descanso ====================================================
+let intervaloSlidesLateral = null;
+let intervaloSlidesPopup = null;
 let timerTelaDescanso = null;
+let revisaoMidias = null;
+let atualizacaoMidiasEmAndamento = false;
 
-// Verifica se existe ao menos 1 mídia para a tela de descanso
+
+function tempoValido(valor, fallback) {
+    const numero = Number(valor);
+    return Number.isFinite(numero) && numero > 0 ? numero : fallback;
+}
+
+
+function iniciarSlidesLateral() {
+    if (intervaloSlidesLateral) {
+        clearInterval(intervaloSlidesLateral);
+        intervaloSlidesLateral = null;
+    }
+
+    const slides = Array.from(document.querySelectorAll(".slide-item"));
+    slides.forEach((slide) => slide.classList.remove("active"));
+
+    if (slides.length === 0) {
+        return;
+    }
+
+    let index = 0;
+    slides[index].classList.add("active");
+
+    if (slides.length === 1) {
+        return;
+    }
+
+    intervaloSlidesLateral = setInterval(() => {
+        slides[index].classList.remove("active");
+        index = (index + 1) % slides.length;
+        slides[index].classList.add("active");
+    }, tempoValido(window.TEMPO_IMAGEM, 5000));
+}
+
+
 function existeMidiaTelaDescanso() {
     return document.querySelectorAll(
-        "#popup_banner .slide-item_tela_descanso"
+        "#popup_banner .slide-item_tela_descanso",
     ).length > 0;
 }
 
-// Ativa tela de descanso
-function ativarTelaDescanso() {
-    if (!existeMidiaTelaDescanso()) return; // ⛔ não ativa sem mídias
-    document.getElementById("area-tela_descanso")?.classList.add("active");
-    iniciarSlideshowTelaDescanso("popup_banner", TEMPO_TELA_DESCANSO);
 
+function pararSlideshowTelaDescanso() {
+    if (intervaloSlidesPopup) {
+        clearInterval(intervaloSlidesPopup);
+        intervaloSlidesPopup = null;
+    }
 }
 
-// Desativa tela de descanso
+
+function iniciarSlideshowTelaDescanso(containerId, tempo) {
+    pararSlideshowTelaDescanso();
+
+    const slides = Array.from(
+        document.querySelectorAll(
+            `#${containerId} .slide-item_tela_descanso`,
+        ),
+    );
+    slides.forEach((slide) => {
+        slide.classList.remove("active", "saindo");
+    });
+
+    if (slides.length === 0) {
+        return;
+    }
+
+    let index = 0;
+    slides[index].classList.add("active");
+
+    if (slides.length === 1) {
+        return;
+    }
+
+    intervaloSlidesPopup = setInterval(() => {
+        const atual = slides[index];
+        atual.classList.remove("active");
+        atual.classList.add("saindo");
+
+        index = (index + 1) % slides.length;
+        slides[index].classList.add("active");
+
+        setTimeout(() => {
+            atual.classList.remove("saindo");
+        }, 800);
+    }, tempoValido(tempo, 10000));
+}
+
+
+function ativarTelaDescanso() {
+    if (!existeMidiaTelaDescanso()) {
+        return;
+    }
+
+    document.getElementById("area-tela_descanso")?.classList.add("active");
+    iniciarSlideshowTelaDescanso(
+        "popup_banner",
+        window.TEMPO_TELA_DESCANSO,
+    );
+}
+
+
 function desativarTelaDescanso() {
     document.getElementById("area-tela_descanso")?.classList.remove("active");
+    pararSlideshowTelaDescanso();
 }
 
-// Reseta contador de inatividade
+
 function resetarTimerTelaDescanso() {
     desativarTelaDescanso();
 
@@ -49,37 +118,98 @@ function resetarTimerTelaDescanso() {
         clearTimeout(timerTelaDescanso);
     }
 
-    timerTelaDescanso = setTimeout(() => {
-        ativarTelaDescanso();
-    }, TEMPO_TELA_DESCANSO);
+    timerTelaDescanso = setTimeout(
+        ativarTelaDescanso,
+        tempoValido(window.TEMPO_TELA_DESCANSO, 10000),
+    );
 }
 
-// Inicializa ao carregar o painel
+
+function aplicarMidiasAtualizadas(dados) {
+    const containerLateral = document.getElementById("slide-container");
+    const containerPopup = document.getElementById("slide-container_popup");
+    const popupEstavaAtivo = document
+        .getElementById("area-tela_descanso")
+        ?.classList.contains("active");
+
+    if (!containerLateral || !containerPopup) {
+        return;
+    }
+
+    containerLateral.innerHTML = dados.lateral_html || "";
+    containerPopup.innerHTML = dados.popup_html || "";
+    window.TEMPO_IMAGEM = tempoValido(dados.tempo_imagem_ms, 5000);
+    window.TEMPO_TELA_DESCANSO = tempoValido(
+        dados.tempo_popup_ms,
+        10000,
+    );
+
+    iniciarSlidesLateral();
+
+    if (popupEstavaAtivo && existeMidiaTelaDescanso()) {
+        iniciarSlideshowTelaDescanso(
+            "popup_banner",
+            window.TEMPO_TELA_DESCANSO,
+        );
+    } else if (!existeMidiaTelaDescanso()) {
+        desativarTelaDescanso();
+    }
+}
+
+
+async function atualizarMidiasPainel() {
+    if (
+        atualizacaoMidiasEmAndamento
+        || !window.PAINEL_ID
+        || !window.URL_MIDIAS_PAINEL
+    ) {
+        return;
+    }
+
+    atualizacaoMidiasEmAndamento = true;
+
+    try {
+        const url = new URL(
+            window.URL_MIDIAS_PAINEL,
+            window.location.origin,
+        );
+        url.searchParams.set("painel", window.PAINEL_ID);
+
+        if (revisaoMidias) {
+            url.searchParams.set("revisao", revisaoMidias);
+        }
+
+        const resposta = await fetch(url, {
+            cache: "no-store",
+            headers: {"Accept": "application/json"},
+        });
+
+        if (!resposta.ok) {
+            throw new Error(`HTTP ${resposta.status}`);
+        }
+
+        const dados = await resposta.json();
+        revisaoMidias = dados.revisao || revisaoMidias;
+
+        if (dados.alterado) {
+            aplicarMidiasAtualizadas(dados);
+            console.log("🖼️ Mídias do painel atualizadas automaticamente.");
+        }
+    } catch (erro) {
+        console.warn("Não foi possível atualizar as mídias do painel.", erro);
+    } finally {
+        atualizacaoMidiasEmAndamento = false;
+    }
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
+    iniciarSlidesLateral();
     resetarTimerTelaDescanso();
+    atualizarMidiasPainel();
+
+    setInterval(
+        atualizarMidiasPainel,
+        tempoValido(window.INTERVALO_ATUALIZACAO_MIDIAS, 10000),
+    );
 });
-
-// Controle dos Slides Tela de Descanso ====================================================
-function iniciarSlideshowTelaDescanso(containerId, tempo) {
-    const slides = document.querySelectorAll(`#${containerId} .slide-item_tela_descanso`);
-    if (!slides.length) return;
-
-    let index = 0;
-    slides[index].classList.add("active");
-
-    setInterval(() => {
-        const atual = slides[index];
-        atual.classList.remove("active");
-        atual.classList.add("saindo");
-
-        index = (index + 1) % slides.length;
-        const proximo = slides[index];
-
-        proximo.classList.add("active");
-
-        // Remove classe 'saindo' após a animação
-        setTimeout(() => {
-            atual.classList.remove("saindo");
-        }, 800);
-    }, tempo);
-}

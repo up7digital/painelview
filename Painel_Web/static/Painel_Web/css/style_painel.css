@@ -6,10 +6,15 @@ h1, h2, p{
 .area-senha_atual{
     flex: 1;
     height: 78vh;
+    min-width: 0;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: clamp(0.75rem, 1.5vh, 1.5rem);
+    padding: clamp(1.25rem, 2.5vh, 2.5rem) clamp(1.5rem, 3vw, 4rem);
+    overflow: hidden;
     background-color: #ebebeb;
 }
 .bloco1{
@@ -19,31 +24,86 @@ h1, h2, p{
 }
 .senha-atual{
     display: flex;
-    flex-direction: row;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    justify-content: center;
     align-items: center;
     margin-block: 0px;
 }
 .detalhes-atual{
     display: flex;
+    flex: 0 0 auto;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    gap: clamp(0.5rem, 1.2vh, 1rem);
     margin-block: 0px;
 }
 .senha-atual_exbicao{
-    font-size: 18vw;
+    max-width: 100%;
+    font-size: clamp(10rem, 21vw, 25rem);
+    line-height: 0.82;
+    letter-spacing: -0.045em;
     font-weight: 700;
     margin-bottom: 0px;
 }
+.detalhes-atual_cliente{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(2.25rem, 3.8vw, 4.75rem);
+    line-height: 1.05;
+    font-weight: 800;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.detalhes-atual_cliente[hidden]{
+    display: none;
+}
+.detalhes-atual_linha{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    column-gap: clamp(1.5rem, 3vw, 3.5rem);
+    row-gap: 0.25rem;
+    width: 100%;
+}
 .detalhes-atual_local{
-    font-size: 100pt;
+    font-size: clamp(2.5rem, 4.8vw, 6rem);
+    line-height: 1;
     font-weight:800;
     color: black;
     margin-block: 0px;
 }
 .detalhes-atual_prioridade{
-    font-size: 80pt;
+    font-size: clamp(2.5rem, 4.8vw, 6rem);
+    line-height: 1;
     font-weight: 900;
     margin-block: 0px;
+}
+
+@media (max-height: 720px) {
+    .area-senha_atual{
+        gap: 0.5rem;
+        padding-top: 1rem;
+        padding-bottom: 3.5rem;
+    }
+    .senha-atual_exbicao{
+        font-size: clamp(8rem, 18vw, 18rem);
+    }
+    .detalhes-atual_cliente{
+        font-size: clamp(1.75rem, 3.2vw, 3.5rem);
+    }
+    .detalhes-atual_local{
+        font-size: clamp(2rem, 4vw, 4.25rem);
+    }
+    .detalhes-atual_prioridade{
+        font-size: clamp(2rem, 4vw, 4.25rem);
+    }
 }
 
 /* ----------------- Painel Lateral ----------------- */
@@ -82,7 +142,7 @@ h1, h2, p{
     justify-content: center;
     text-align: center;
     font-weight: bold;
-    font-size: 35pt;
+    font-size: var(--tamanho-texto-midia, 32px);
     color: white;
 }
 .tela_descanso-slide_texto{
@@ -209,4 +269,91 @@ h1, h2, p{
     max-height: 100%;
     object-fit: cover;
     box-shadow: 0px 0px 2pc black;
+}
+
+/* ----------------- ORIENTAÇÃO VERTICAL ----------------- */
+@media (orientation: portrait) {
+    .bloco1{
+        flex-direction: column;
+        height: 78vh;
+    }
+
+    #painel-lateral{
+        order: -1;
+        flex: 0 0 24vh;
+        width: 100%;
+        height: 24vh;
+        box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 35%);
+    }
+
+    #painel-lateral .slide-item{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #painel-lateral .slide-media{
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        object-fit: cover;
+        object-position: center;
+        box-shadow: none;
+    }
+
+    #painel-lateral .slide-texto{
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 1rem 4vw;
+    }
+
+    .area-senha_atual{
+        flex: 1 1 auto;
+        height: auto;
+        min-height: 0;
+        justify-content: center;
+        gap: clamp(0.75rem, 1.5vh, 1.5rem);
+        padding: clamp(1.5rem, 3vh, 3rem) clamp(1.25rem, 4vw, 3rem);
+    }
+
+    .senha-atual{
+        flex: 0 1 auto;
+    }
+
+    .senha-atual_exbicao{
+        font-size: clamp(8rem, 25vw, 18rem);
+        line-height: 0.85;
+    }
+
+    .detalhes-atual_cliente{
+        font-size: clamp(2rem, 5vw, 4rem);
+    }
+
+    .detalhes-atual_linha{
+        column-gap: clamp(1rem, 3vw, 2.5rem);
+    }
+
+    .detalhes-atual_local,
+    .detalhes-atual_prioridade{
+        font-size: clamp(1.75rem, 4.6vw, 3.5rem);
+    }
+
+    .label-historico{
+        top: clamp(-1.75rem, -2vh, -1rem);
+        font-size: clamp(1.75rem, 5vw, 3rem);
+    }
+
+    .historico-lista{
+        padding-inline-start: 0;
+    }
+
+    .historico-senha_atual{
+        font-size: clamp(1.75rem, 5.5vw, 4rem);
+    }
+
+    .hist-local{
+        font-size: clamp(1.25rem, 3.5vw, 2.5rem);
+    }
 }

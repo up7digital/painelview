@@ -5,50 +5,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-
-
+    <meta name="description" content="Seleção de painel do Painel View">
+    <title>Painel View | SGA</title>
     <link rel="stylesheet" href="{% static 'Painel_Web/css/style_painel_home.css' %}">
-
-    <title>Painel Home</title>
 </head>
 <body>
     <main id="main-painel_home">
-        <h2 class="title">
-            <img src={% static 'Painel_Web/img/cone_confete.png' %} style="height: 50px">
-            Painel View - SGA
-            <img src={% static 'Painel_Web/img/cone_confete.png' %} style="height: 50px; transform: scaleX(-1);">
-        </h2>
-        
-        <form id="form_home" method="get" action="{% url 'exibir_painel' %}">
-            <select id="select_setor" name="setor" required>
-                <option value="">-- Escolher um setor --</option>
-                {% for setor in setores %}
-                <option value="{{ setor.id }}">{{ setor.nome_setor }}</option>
-                {% endfor %}
-            </select>
+        <section class="home-card">
+            <header class="home-header">
+                <div>
+                    <span class="eyebrow">Painel View</span>
+                    <h1>Painel View - SGA</h1>
+                    <p>Selecione o setor e o painel que deseja exibir.</p>
+                </div>
+            </header>
 
-            <select id="select_painel" name="painel" required disabled>
-                <option value="">-- Escolher um painel --</option>
-            </select>
+            <form id="form_home" method="get" action="{% url 'exibir_painel' %}">
+                <div class="home-field">
+                    <label for="select_setor">Setor</label>
+                    <div class="home-select-control">
+                        <span class="home-field-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M4 20V10l8-6 8 6v10"/><path d="M9 20v-6h6v6M3 20h18"/></svg>
+                        </span>
+                        <select id="select_setor" name="setor" required>
+                            <option value="">Escolher um setor</option>
+                            {% for setor in setores %}
+                                <option value="{{ setor.id }}">{{ setor.nome_setor }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
 
-            <hr>
+                <div class="home-field">
+                    <label for="select_painel">Painel</label>
+                    <div class="home-select-control">
+                        <span class="home-field-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                        </span>
+                        <select id="select_painel" name="painel" required disabled>
+                            <option value="">Escolher um painel</option>
+                        </select>
+                    </div>
+                </div>
 
-            <button type="submit" id="btn-acessar_painel">Acessar</button>
-        </form>
-        <span id="span-versao">Versão 2.0.0 - Atualização de Carnaval</span>
+                <button type="submit" id="btn-acessar_painel">
+                    <span>Acessar painel</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+            </form>
+
+            <span id="span-versao">Versão 3.0.0</span>
+        </section>
+
+        <a id="btn-configuracoes" href="{% url 'administracao:login' %}?next={% url 'administracao:configuracoes' %}">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.5 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.5"/>
+            </svg>
+            <span>Configurações</span>
+        </a>
     </main>
+
+    <script src="{% static 'js/mecanismos_home.js' %}"></script>
 </body>
-
-<!--Área de Scripts-->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script src="{% static 'js/mecanismos_home.js' %}"></script>
-
-<script>
-
-
-</script>
-
 </html>

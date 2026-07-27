@@ -1,0 +1,143 @@
+{% extends "Administracao/Configuracoes.html" %}
+{% load static %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <a class="back-link" href="{% url 'administracao:gestao_paineis' %}">← Voltar para painéis</a>
+            <span class="section-label">Painel View</span>
+            {% if modo_cadastro %}
+                <h2>Novo painel</h2>
+                <p>Informe os dados necessários para configurar o novo painel.</p>
+            {% else %}
+                <h2>{{ painel.nome }}</h2>
+                <p>Visualize ou atualize a configuração deste painel.</p>
+            {% endif %}
+        </div>
+        {% if not modo_cadastro %}
+            <span class="status-badge status-{{ painel.status|lower }}">
+                {{ painel.get_status_display }}
+            </span>
+        {% endif %}
+    </header>
+
+    {% if messages %}
+        <div class="messages" aria-live="polite">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if form.sga_error %}
+        <div class="form-warning" role="alert">{{ form.sga_error }}</div>
+    {% endif %}
+
+    <form
+        class="connection-form"
+        method="post"
+        data-unidades-url="{% url 'ajax_carregar_unidades' %}"
+        data-servicos-url="{% url 'ajax_carregar_servicos' %}"
+    >
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-grid">
+            {% for field in form %}
+                {% if field.name == "servicos_sga" %}
+                    <div class="form-field form-field-services{% if field.errors %} has-error{% endif %}">
+                        <label>{{ field.label }}</label>
+
+                        <div class="dual-list-widget" data-services-widget>
+                            <section class="dual-list-panel">
+                                <header>
+                                    <strong>Serviços disponíveis</strong>
+                                    <span>Selecione os serviços e use a seta para adicioná-los.</span>
+                                </header>
+                                <label class="dual-list-search">
+                                    <span aria-hidden="true">⌕</span>
+                                    <input type="search" data-filter-available placeholder="Filtrar serviços disponíveis">
+                                </label>
+                                <select data-services-available multiple aria-label="Serviços disponíveis"></select>
+                            </section>
+
+                            <div class="dual-list-controls">
+                                <button type="button" data-add-services aria-label="Adicionar serviços selecionados">→</button>
+                                <button type="button" data-remove-services aria-label="Remover serviços selecionados">←</button>
+                            </div>
+
+                            <section class="dual-list-panel dual-list-panel-selected">
+                                <header>
+                                    <strong>Serviços selecionados</strong>
+                                    <span>Selecione os serviços e use a seta para removê-los.</span>
+                                </header>
+                                <label class="dual-list-search">
+                                    <span aria-hidden="true">⌕</span>
+                                    <input type="search" data-filter-selected placeholder="Filtrar serviços selecionados">
+                                </label>
+                                <select data-services-selected multiple aria-label="Serviços selecionados"></select>
+                            </section>
+                        </div>
+
+                        <div class="native-services-select" aria-hidden="true">{{ field }}</div>
+
+                        {% if field.help_text %}
+                            <span class="help-text">{{ field.help_text }}</span>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="form-field{% if field.errors %} has-error{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <span class="help-text">{{ field.help_text }}</span>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    {% if field.name == "tom_vocalizacao" %}
+                        <div class="form-field voice-preview-field">
+                            <label>Prévia da vocalização</label>
+                            <button
+                                class="button button-secondary"
+                                id="btn-preview-vocalizacao"
+                                type="button"
+                                aria-label="Ouvir prévia das configurações da voz"
+                            >
+                                <span aria-hidden="true">▶</span>
+                                Ouvir prévia
+                            </button>
+                            <span class="help-text">Senha A 0 1, Guichê 1</span>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <a class="button button-secondary" href="{% url 'administracao:gestao_paineis' %}">Cancelar</a>
+            <button class="button button-primary" type="submit">
+                {% if modo_cadastro %}Cadastrar painel{% else %}Salvar alterações{% endif %}
+            </button>
+        </div>
+    </form>
+</section>
+
+<script
+    src="https://unpkg.com/talkify-tts@4.0.0/dist/talkify.min.js"
+    onerror="console.error('Falha ao carregar a biblioteca Talkify para a prévia.')"
+></script>
+<script src="{% static 'Administracao/js/paineis_detalhes.js' %}?v=1.1.1"></script>
+{% endblock %}

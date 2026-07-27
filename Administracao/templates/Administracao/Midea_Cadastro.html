@@ -1,0 +1,180 @@
+{% extends "Administracao/Configuracoes.html" %}
+{% load static %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <a class="back-link" href="{% url 'administracao:gestao_midias' %}">← Voltar para mídias visuais</a>
+            <span class="section-label">Painel View</span>
+            <h2>Nova mídia</h2>
+            <p>Escolha o tipo e informe o conteúdo que será exibido nos painéis.</p>
+        </div>
+    </header>
+
+    <form class="connection-form new-media-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-grid">
+            <div class="form-field form-field-tipo{% if form.tipo.errors %} has-error{% endif %}">
+                <label for="{{ form.tipo.id_for_label }}">{{ form.tipo.label }}</label>
+                {{ form.tipo }}
+                {% for error in form.tipo.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-field new-media-dynamic-block{% if form.arquivo.errors %} has-error{% endif %}" data-media-file-fields>
+                <label for="{{ form.arquivo.id_for_label }}">Arquivo da mídia</label>
+                <label class="media-file-control" data-media-file-control>
+                    <span class="media-file-button">Escolher arquivo</span>
+                    <span
+                        class="media-current-file"
+                        data-current-file-name
+                        data-original-name="Nenhum arquivo selecionado"
+                    >
+                        {% if form.arquivo.value %}
+                            {{ form.arquivo.value }}
+                        {% else %}
+                            Nenhum arquivo selecionado
+                        {% endif %}
+                    </span>
+                    {{ form.arquivo }}
+                </label>
+                <span class="help-text">Imagens: PNG, JPG, JPEG ou WEBP. Vídeos: MP4 ou MOV. Tamanho máximo: 8 MB.</span>
+                {% for error in form.arquivo.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-field new-media-dynamic-block new-media-text-block" data-media-text-fields>
+                <label>Texto para exibição</label>
+                {{ form.texto.as_hidden }}
+                {{ form.texto_tamanho_fonte.as_hidden }}
+                {{ form.texto_cor.as_hidden }}
+                {{ form.texto_alinhamento.as_hidden }}
+
+                <div class="media-text-editor-wrapper">
+                    <div class="media-text-toolbar" aria-label="Formatação do texto">
+                        <label class="text-format-control" for="text-font-size">
+                            <span>Tamanho</span>
+                            <input
+                                id="text-font-size"
+                                type="number"
+                                min="12"
+                                max="120"
+                                value="{{ form.texto_tamanho_fonte.value|default:32 }}"
+                                data-text-font-size
+                            >
+                            <span>px</span>
+                        </label>
+                        <label class="text-format-control text-color-control" for="text-color">
+                            <span>Cor</span>
+                            <input
+                                id="text-color"
+                                type="color"
+                                value="{{ form.texto_cor.value|default:'#ffffff' }}"
+                                data-text-color
+                            >
+                        </label>
+                        <div class="text-alignment-controls" role="group" aria-label="Alinhamento">
+                            <button type="button" data-text-align="left" title="Alinhar à esquerda" aria-label="Alinhar à esquerda">☰</button>
+                            <button type="button" data-text-align="center" title="Centralizar" aria-label="Centralizar">☰</button>
+                            <button type="button" data-text-align="right" title="Alinhar à direita" aria-label="Alinhar à direita">☰</button>
+                        </div>
+                    </div>
+                    <div class="media-text-editor-container">
+                        <div
+                            class="media-text-editor"
+                            contenteditable="true"
+                            role="textbox"
+                            aria-multiline="true"
+                            aria-label="Texto para exibição"
+                            data-text-preview
+                            data-max-length="{{ form.texto.field.max_length }}"
+                            data-placeholder="Digite aqui o texto que será exibido..."
+                        >{{ form.texto.value|default_if_none:"" }}</div>
+                        <span class="media-text-counter" data-text-counter aria-live="polite"></span>
+                    </div>
+                </div>
+
+                {% for error in form.texto.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+                {% for error in form.texto_tamanho_fonte.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+                {% for error in form.texto_cor.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+                {% for error in form.texto_alinhamento.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-field form-field-ordem{% if form.ordem.errors %} has-error{% endif %}">
+                <label for="{{ form.ordem.id_for_label }}">{{ form.ordem.label }}</label>
+                {{ form.ordem }}
+                {% for error in form.ordem.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-field form-field-ativo{% if form.ativo.errors %} has-error{% endif %}">
+                <label for="{{ form.ativo.id_for_label }}">{{ form.ativo.label }}</label>
+                {{ form.ativo }}
+                {% for error in form.ativo.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-field form-field-exibir_lateral{% if form.exibir_lateral.errors %} has-error{% endif %}">
+                <label for="{{ form.exibir_lateral.id_for_label }}">{{ form.exibir_lateral.label }}</label>
+                {{ form.exibir_lateral }}
+                {% for error in form.exibir_lateral.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-field form-field-exibir_popup{% if form.exibir_popup.errors %} has-error{% endif %}">
+                <label for="{{ form.exibir_popup.id_for_label }}">{{ form.exibir_popup.label }}</label>
+                {{ form.exibir_popup }}
+                {% for error in form.exibir_popup.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-field form-field-setores">
+                <label>{{ form.setores.label }}</label>
+                <div class="sector-selector" data-sector-selector>
+                    <label class="sector-select-all">
+                        <input type="checkbox" data-select-all-sectors>
+                        <span>
+                            <strong>{% if eh_admin %}Exibir em todos os setores{% else %}Exibir em todos os meus setores{% endif %}</strong>
+                            <small>Marque ou desmarque os setores permitidos para esta mídia.</small>
+                        </span>
+                    </label>
+                    <div class="sector-checkbox-list" data-sector-checkboxes>
+                        {{ form.setores }}
+                    </div>
+                </div>
+                {% for error in form.setores.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="button button-secondary" href="{% url 'administracao:gestao_midias' %}">Cancelar</a>
+            <button class="button button-primary" type="submit">Cadastrar mídia</button>
+        </div>
+    </form>
+</section>
+
+<script src="{% static 'Administracao/js/midia_detalhada.js' %}"></script>
+<script src="{% static 'Administracao/js/midia_cadastro.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "Administracao/Configuracoes.html" %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <a class="back-link" href="{% url 'administracao:gestao_users' %}">← Voltar para usuários</a>
+            <span class="section-label">Painel View</span>
+            <h2>{{ usuario.username }}</h2>
+            <p>Visualize ou atualize os dados e o perfil deste usuário.</p>
+        </div>
+        <span class="item-count">Usuário #{{ usuario.id }}</span>
+    </header>
+
+    {% if messages %}
+        <div class="messages" aria-live="polite">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form class="connection-form" method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-grid">
+            {% for field in form %}
+                <div class="form-field form-field-{{ field.name }}{% if field.errors %} has-error{% endif %}">
+                    {% if field.name == "groups" or field.name == "setores" %}
+                        <label>{{ field.label }}</label>
+                        <div class="user-groups-selector">
+                            {{ field }}
+                        </div>
+                    {% elif field.name == "is_active" %}
+                        <label class="user-active-control" for="{{ field.id_for_label }}">
+                            {{ field }}
+                            <span>Usuário ativo</span>
+                        </label>
+                        <span class="help-text">Usuários inativos não podem acessar as configurações.</span>
+                    {% else %}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    {% endif %}
+
+                    {% if field.help_text and field.name != "is_active" %}
+                        <span class="help-text">{{ field.help_text }}</span>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <span class="field-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <a class="button button-secondary" href="{% url 'administracao:gestao_users' %}">Cancelar</a>
+            <button class="button button-primary" type="submit">Salvar alterações</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

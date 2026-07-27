@@ -15,6 +15,7 @@
     <div class="area-senha_atual">
         <div class="senha-atual">
             <label id="senha-atual-num"
+                data-chamada-id="{% if senha_atual %}{{ senha_atual.id|default:'' }}{% endif %}"
                 class="senha-atual_exbicao 
                 {% if senha_atual and senha_atual.prioridade == 'Normal' %}
                 color_convencional
@@ -27,48 +28,35 @@
         
         <div class="detalhes-atual">
             <!-- IDs para manipulação via JS -->
-            <p id="senha-atual-local" class="detalhes-atual_local">
-                {% if senha_atual %}Local: {{ senha_atual.local }} {{ senha_atual.numeroLocal }}{% endif %}
+            <p id="senha-atual-cliente"
+                class="detalhes-atual_cliente
+                {% if senha_atual and senha_atual.prioridade == 'Normal' %}
+                    color_convencional
+                {% elif senha_atual and senha_atual.prioridade == 'Prioridade' %}
+                    color_prioridade
+                {% endif %}"
+                {% if not senha_atual.nomeCliente %}hidden{% endif %}>
+                {% if senha_atual %}{{ senha_atual.nomeCliente|default:"" }}{% endif %}
             </p>
-            <p id="senha-atual-prioridade" class="detalhes-atual_prioridade {% if senha_atual and senha_atual.prioridade == 'Normal' %}
-            color_convencional
-            {% elif senha_atual and senha_atual.prioridade == 'Prioridade' %}
-                color_prioridade
-            {% endif %}">
-            {% if senha_atual %}{{ senha_atual.prioridade }}{% endif %}
-            </p>
-            
+            <div class="detalhes-atual_linha">
+                <p id="senha-atual-local" class="detalhes-atual_local">
+                    {% if senha_atual %}Local: {{ senha_atual.local }} {{ senha_atual.numeroLocal }}{% endif %}
+                </p>
+                <p id="senha-atual-prioridade" class="detalhes-atual_prioridade {% if senha_atual and senha_atual.prioridade == 'Normal' %}
+                color_convencional
+                {% elif senha_atual and senha_atual.prioridade == 'Prioridade' %}
+                    color_prioridade
+                {% endif %}">
+                {% if senha_atual %}{{ senha_atual.prioridade }}{% endif %}
+                </p>
+            </div>
         </div>
     </div>
 
     <!-- Painel lateral -->
     <div id="painel-lateral">
         <div id="slide-container">
-
-            {% for m in midias %}
-            {% if m.exibir_lateral == 0 %}
-                <div class="slide-item">
-
-                    {% if m.tipo == "Imagem" %}
-                        <img src="{{ m.arquivo.url }}" class="slide-media">
-
-                    {% elif m.tipo == "Vídeo" %}
-                        <video class="slide-media" autoplay muted loop>
-                            <source src="{{ m.arquivo.url }}" type="video/mp4">
-                        </video>
-
-                    {% elif m.tipo == "Texto" %}
-                        <div class="slide-texto">
-                            {{ m.texto }}
-                        </div>
-
-                    {% endif %}
-
-                </div>
-            {% endif %}
-        {% endfor %}
-
-
+            {% include "Painel_Web/partials/midias_laterais_itens.html" %}
         </div>
     </div>
 

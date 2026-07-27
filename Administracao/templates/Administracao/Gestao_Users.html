@@ -1,0 +1,86 @@
+{% extends "Administracao/Configuracoes.html" %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <span class="section-label">Painel View</span>
+            <h2>Gerenciar usuários</h2>
+            <p>Usuários cadastrados para acesso ao sistema.</p>
+        </div>
+        <span class="item-count">
+            {{ usuarios|length }} usuário{{ usuarios|length|pluralize:"s" }}
+        </span>
+    </header>
+
+    {% if usuarios %}
+        <div class="table-wrapper">
+            <table class="management-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Usuário</th>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Perfil</th>
+                        <th scope="col">Setor</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                        <tr>
+                            <td>
+                                {% if perms.auth.visualizar_usuarios %}
+                                <a class="panel-row-link user-username" href="{% url 'administracao:user_detalhes' usuario.id %}">
+                                    {{ usuario.username }}
+                                </a>
+                                {% else %}
+                                    <span class="user-username">{{ usuario.username }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ usuario.get_full_name|default:"Não informado" }}</td>
+                            <td>
+                                {% for grupo in usuario.groups.all %}
+                                    <span class="user-profile-badge">{{ grupo.name }}</span>
+                                {% empty %}
+                                    <span class="user-profile-empty">Sem perfil</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for setor in usuario.setores_vinculados %}
+                                    <span class="user-profile-badge">{{ setor.nome_setor }}</span>
+                                {% empty %}
+                                    <span class="user-profile-empty">Sem setor</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if usuario.is_active %}
+                                    <span class="status-badge status-ativo">Ativo</span>
+                                {% else %}
+                                    <span class="status-badge status-inativo">Inativo</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-state-icon" aria-hidden="true">♙</span>
+            <h3>Nenhum usuário cadastrado</h3>
+            <p>Os usuários adicionados ao sistema aparecerão aqui.</p>
+        </div>
+    {% endif %}
+</section>
+
+{% if perms.auth.cadastrar_usuarios %}
+<a
+    class="floating-add-button"
+    href="{% url 'administracao:user_cadastro' %}"
+    aria-label="Cadastrar novo usuário"
+    title="Cadastrar novo usuário"
+>
+    <span aria-hidden="true">+</span>
+</a>
+{% endif %}
+{% endblock %}

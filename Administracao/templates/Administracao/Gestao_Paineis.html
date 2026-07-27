@@ -1,0 +1,62 @@
+{% extends "Administracao/Configuracoes.html" %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <span class="section-label">Painel View</span>
+            <h2>Painéis cadastrados</h2>
+            <p>Painéis disponíveis para exibição das senhas do Novo SGA.</p>
+        </div>
+        <span class="item-count">
+            {{ paineis|length }} pain{{ paineis|length|pluralize:"el,éis" }}
+        </span>
+    </header>
+
+    {% if paineis %}
+        <div class="table-wrapper">
+            <table class="management-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome do painel</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for painel in paineis %}
+                        <tr>
+                            <td>
+                                <a class="panel-row-link panel-name" href="{% url 'administracao:painel_detalhes' painel.id %}">
+                                    {{ painel.nome }}
+                                </a>
+                            </td>
+                            <td>
+                                <a class="panel-row-link" href="{% url 'administracao:painel_detalhes' painel.id %}">
+                                    <span class="status-badge status-{{ painel.status|lower }}">
+                                        {{ painel.get_status_display }}
+                                    </span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-state-icon" aria-hidden="true">▣</span>
+            <h3>Nenhum painel cadastrado</h3>
+            <p>Os painéis adicionados ao sistema aparecerão aqui.</p>
+        </div>
+    {% endif %}
+</section>
+
+<a
+    class="floating-add-button"
+    href="{% url 'administracao:painel_cadastro' %}"
+    aria-label="Cadastrar novo painel"
+    title="Cadastrar novo painel"
+>
+    <span aria-hidden="true">+</span>
+</a>
+{% endblock %}

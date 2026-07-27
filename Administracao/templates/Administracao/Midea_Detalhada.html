@@ -1,0 +1,179 @@
+{% extends "Administracao/Configuracoes.html" %}
+{% load static %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <a class="back-link" href="{% url 'administracao:gestao_midias' %}">← Voltar para mídias visuais</a>
+            <span class="section-label">Painel View</span>
+            <h2>{{ nome_midia|default:"Detalhes da mídia" }}</h2>
+            <p>Visualize ou atualize as configurações desta mídia.</p>
+        </div>
+        <span class="media-type-badge">{{ tipo_midia }}</span>
+    </header>
+
+    <div class="media-detail-layout">
+        <div class="media-detail-preview">
+            {% if tipo_midia == "Imagem" and arquivo_url %}
+                <img src="{{ arquivo_url }}" alt="Prévia de {{ nome_midia }}">
+            {% elif tipo_midia == "Vídeo" and arquivo_url %}
+                <video controls preload="metadata">
+                    <source src="{{ arquivo_url }}">
+                    Seu navegador não suporta a reprodução deste vídeo.
+                </video>
+            {% elif tipo_midia == "Texto" %}
+                <div class="media-text-editor-wrapper">
+                    <div class="media-text-toolbar" aria-label="Formatação do texto">
+                        <label class="text-format-control" for="text-font-size">
+                            <span>Tamanho</span>
+                            <input
+                                id="text-font-size"
+                                type="number"
+                                min="12"
+                                max="120"
+                                value="{{ form.texto_tamanho_fonte.value|default:32 }}"
+                                data-text-font-size
+                            >
+                            <span>px</span>
+                        </label>
+                        <label class="text-format-control text-color-control" for="text-color">
+                            <span>Cor</span>
+                            <input
+                                id="text-color"
+                                type="color"
+                                value="{{ form.texto_cor.value|default:'#ffffff' }}"
+                                data-text-color
+                            >
+                        </label>
+                        <div class="text-alignment-controls" role="group" aria-label="Alinhamento">
+                            <button type="button" data-text-align="left" title="Alinhar à esquerda" aria-label="Alinhar à esquerda">☰</button>
+                            <button type="button" data-text-align="center" title="Centralizar" aria-label="Centralizar">☰</button>
+                            <button type="button" data-text-align="right" title="Alinhar à direita" aria-label="Alinhar à direita">☰</button>
+                        </div>
+                    </div>
+                    <div class="media-text-editor-container">
+                        <div
+                            class="media-text-editor"
+                            contenteditable="true"
+                            role="textbox"
+                            aria-multiline="true"
+                            aria-label="Texto para exibição"
+                            data-text-preview
+                            data-max-length="{{ form.texto.field.max_length }}"
+                            data-placeholder="Digite aqui o texto que será exibido..."
+                        >{{ form.texto.value|default_if_none:"" }}</div>
+                        <span class="media-text-counter" data-text-counter aria-live="polite"></span>
+                    </div>
+                    {% for error in form.texto.errors %}
+                        <span class="field-error">{{ error }}</span>
+                    {% endfor %}
+                    {% for error in form.texto_tamanho_fonte.errors %}
+                        <span class="field-error">{{ error }}</span>
+                    {% endfor %}
+                    {% for error in form.texto_cor.errors %}
+                        <span class="field-error">{{ error }}</span>
+                    {% endfor %}
+                    {% for error in form.texto_alinhamento.errors %}
+                        <span class="field-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <section class="media-detail-fields">
+            {% if messages %}
+                <div class="messages" aria-live="polite">
+                    {% for message in messages %}
+                        <div class="message message-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form class="connection-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if tipo_midia == "Texto" %}
+                    {{ form.texto.as_hidden }}
+                    {{ form.texto_tamanho_fonte.as_hidden }}
+                    {{ form.texto_cor.as_hidden }}
+                    {{ form.texto_alinhamento.as_hidden }}
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    <div class="form-errors">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="form-grid">
+                    {% for field in form %}
+                        {% if field.name != "texto" and field.name != "texto_tamanho_fonte" and field.name != "texto_cor" and field.name != "texto_alinhamento" and field.name != "setores" %}
+                            <div class="form-field form-field-{{ field.name }}{% if field.errors %} has-error{% endif %}">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                                {% if field.name == "arquivo" %}
+                                    <label class="media-file-control" data-media-file-control>
+                                        <span class="media-file-button">Escolher novo arquivo</span>
+                                        <span
+                                            class="media-current-file"
+                                            data-current-file-name
+                                            data-original-name="{{ nome_midia }}"
+                                        >
+                                            {{ nome_midia }}
+                                        </span>
+                                        {{ field }}
+                                    </label>
+                                {% else %}
+                                        {{ field }}
+                                {% endif %}
+
+                                {% if field.help_text %}
+                                    <span class="help-text">{{ field.help_text }}</span>
+                                {% endif %}
+
+                                {% for error in field.errors %}
+                                    <span class="field-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="form-field form-field-setores">
+                        <label>{{ form.setores.label }}</label>
+                        <div class="sector-selector" data-sector-selector>
+                            <label class="sector-select-all">
+                                <input type="checkbox" data-select-all-sectors>
+                                <span>
+                                    <strong>{% if eh_admin %}Exibir em todos os setores{% else %}Exibir em todos os meus setores{% endif %}</strong>
+                                    <small>Marque ou desmarque os setores permitidos para esta mídia.</small>
+                                </span>
+                            </label>
+                            <div class="sector-checkbox-list" data-sector-checkboxes>
+                                {{ form.setores }}
+                            </div>
+                        </div>
+                        {% for error in form.setores.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a class="button button-secondary" href="{% url 'administracao:gestao_midias' %}">Cancelar</a>
+                    <button class="button button-primary" type="submit">Salvar alterações</button>
+                    <button
+                        class="button button-danger"
+                        type="submit"
+                        name="acao"
+                        value="excluir"
+                        formnovalidate
+                        data-delete-media-button
+                    >
+                        Excluir mídia
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+</section>
+
+<script src="{% static 'Administracao/js/midia_detalhada.js' %}"></script>
+{% endblock %}

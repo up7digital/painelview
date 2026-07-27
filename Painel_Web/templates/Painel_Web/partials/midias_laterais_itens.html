@@ -1,0 +1,20 @@
+{% for m in midias %}
+    {% if m.exibir_lateral == 0 %}
+        <div class="slide-item">
+            {% if m.tipo == "Imagem" %}
+                <img src="{{ m.arquivo.url }}" class="slide-media">
+            {% elif m.tipo == "Vídeo" %}
+                <video class="slide-media" autoplay muted loop>
+                    <source src="{{ m.arquivo.url }}" type="video/mp4">
+                </video>
+            {% elif m.tipo == "Texto" %}
+                <div
+                    class="slide-texto"
+                    style="--tamanho-texto-midia: {{ m.texto_tamanho_fonte|default:32 }}px; color: {{ m.texto_cor }}; text-align: {{ m.texto_alinhamento }};"
+                >
+                    {{ m.texto|linebreaksbr }}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endfor %}

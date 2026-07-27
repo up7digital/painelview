@@ -1,0 +1,57 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Acesso às configurações do Painel View">
+    <title>Login | Painel View</title>
+    <link rel="stylesheet" href="{% static 'Administracao/css/login.css' %}">
+</head>
+<body>
+    <main class="login-page">
+        <section class="login-card">
+            <header class="login-header">
+                <span class="brand-mark" aria-hidden="true">PV</span>
+                <div>
+                    <span class="eyebrow">Painel View</span>
+                    <h1>Acessar configurações</h1>
+                    <p>Informe suas credenciais para continuar.</p>
+                </div>
+            </header>
+
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+
+                {% if form.non_field_errors %}
+                    <div class="login-error" role="alert">
+                        Usuário ou senha inválidos, ou a conta está inativa.
+                    </div>
+                {% endif %}
+
+                <div class="form-field{% if form.username.errors %} has-error{% endif %}">
+                    <label for="{{ form.username.id_for_label }}">Usuário</label>
+                    {{ form.username }}
+                    {% for error in form.username.errors %}
+                        <span class="field-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field{% if form.password.errors %} has-error{% endif %}">
+                    <label for="{{ form.password.id_for_label }}">Senha</label>
+                    {{ form.password }}
+                    {% for error in form.password.errors %}
+                        <span class="field-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <button type="submit">Entrar</button>
+            </form>
+
+            <a class="back-home" href="{% url 'painel_home' %}">← Voltar ao Painel Web</a>
+        </section>
+    </main>
+</body>
+</html>

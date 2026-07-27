@@ -1,0 +1,95 @@
+{% extends "Administracao/Configuracoes.html" %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <span class="section-label">Painel View</span>
+            <h2>Configuração das mídias</h2>
+            {% if eh_admin %}
+                <p>Configurações de exibição de todos os setores.</p>
+            {% elif setores_usuario %}
+                <p>Configurações de exibição dos seus setores vinculados.</p>
+            {% else %}
+                <p>Vincule um setor ao usuário para configurar a exibição das mídias.</p>
+            {% endif %}
+        </div>
+        <span class="item-count">
+            {{ formset.total_form_count }} configuraç{{ formset.total_form_count|pluralize:"ão,ões" }}
+        </span>
+    </header>
+
+    {% if messages %}
+        <div class="messages" aria-live="polite">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if formset.total_form_count %}
+        <form class="media-settings-form" method="post">
+            {% csrf_token %}
+            {{ formset.management_form }}
+
+            {% if formset.non_form_errors %}
+                <div class="form-errors">{{ formset.non_form_errors }}</div>
+            {% endif %}
+
+            <div class="table-wrapper">
+                <table class="management-table media-settings-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Setor</th>
+                            <th scope="col">Tempo de exibição da imagem</th>
+                            <th scope="col">Tempo do Pop-Up</th>
+                            <th scope="col">Atualizado em</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form in formset %}
+                            <tr>
+                                <td>
+                                    {{ form.id }}
+                                    <strong>{{ form.instance.setor.nome_setor }}</strong>
+                                </td>
+                                <td>
+                                    {{ form.tempo_exibicao_imagem }}
+                                    {% for error in form.tempo_exibicao_imagem.errors %}
+                                        <span class="field-error">{{ error }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {{ form.tempo_popup }}
+                                    {% for error in form.tempo_popup.errors %}
+                                        <span class="field-error">{{ error }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <time datetime="{{ form.instance.atualizado_em|date:'c' }}">
+                                        {{ form.instance.atualizado_em|date:"d/m/Y H:i" }}
+                                    </time>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-actions media-settings-actions">
+                <button class="button button-primary" type="submit">Salvar configurações</button>
+            </div>
+        </form>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-state-icon" aria-hidden="true">⚙</span>
+            <h3>Nenhuma configuração disponível</h3>
+            {% if setores_usuario or eh_admin %}
+                <p>Não existem registros na tabela ConfigPainel para os setores permitidos.</p>
+            {% else %}
+                <p>Seu usuário ainda não possui um setor vinculado.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

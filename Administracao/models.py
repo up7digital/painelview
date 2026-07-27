@@ -1,7 +1,8 @@
 import os
+from django.conf import settings
 from django.db import models
 from django.db.models import JSONField
-from django.core.validators import RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.core.exceptions import ValidationError
 #----------------------------------------------------------------------------------
 
@@ -21,6 +22,38 @@ class tb_Setores(models.Model):
 
     def __str__(self):
         return self.nome_setor
+
+
+class UsuarioSetor(models.Model):
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="vinculos_setores",
+        verbose_name="Usuário",
+    )
+    setor = models.ForeignKey(
+        tb_Setores,
+        on_delete=models.SET_NULL,
+        related_name="usuarios_vinculados",
+        verbose_name="Setor",
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = "Setor do usuário"
+        verbose_name_plural = "Setores dos usuários"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=("usuario", "setor"),
+                name="usuario_setor_unico",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.usuario} - {self.setor or 'Sem setor'}"
+
 
 class tb_Conexoes(models.Model):
     nome_conexao = models.CharField("Nome da conexão", max_length=100)
@@ -114,12 +147,40 @@ class MidiaPainel(models.Model):
         (1, "Não"),
     )
 
-    setor = models.ForeignKey(tb_Setores, on_delete=models.CASCADE, related_name="paineis_midea", verbose_name="Mideas do Setor", blank=True, null=True)
+    ALINHAMENTO_TEXTO_CHOICES = (
+        ("left", "Esquerda"),
+        ("center", "Centro"),
+        ("right", "Direita"),
+    )
+
+    setores = models.ManyToManyField(
+        tb_Setores,
+        related_name="midias_visuais",
+        verbose_name="Setores de exibição",
+        blank=True,
+    )
     tipo = models.CharField(max_length=10, choices=TIPOS)
     arquivo = models.FileField(
         upload_to="midias_painel/", blank=True, null=True, validators=[validar_tamanho_arquivo, validar_extensao_arquivo],
     )
-    texto = models.CharField(max_length=50, blank=True, null=True, verbose_name="Texto para Exibição")
+    texto = models.TextField(max_length=100, blank=True, null=True, verbose_name="Texto para Exibição",)
+    texto_tamanho_fonte = models.PositiveIntegerField(
+        default=32,
+        validators=[MinValueValidator(12), MaxValueValidator(120)],
+        verbose_name="Tamanho da fonte",
+    )
+    texto_cor = models.CharField(
+        max_length=7,
+        default="#ffffff",
+        validators=[RegexValidator(regex=r"^#[0-9A-Fa-f]{6}$")],
+        verbose_name="Cor do texto",
+    )
+    texto_alinhamento = models.CharField(
+        max_length=6,
+        choices=ALINHAMENTO_TEXTO_CHOICES,
+        default="center",
+        verbose_name="Alinhamento",
+    )
     ordem = models.PositiveIntegerField(default=0)
     exibir_lateral = models.IntegerField(choices=POPUP_CHOICES, default=0, verbose_name="Exibir no Painel Lateral")
     exibir_popup = models.IntegerField(choices=POPUP_CHOICES, default=1, verbose_name="Exibir no Pop-Up")
@@ -139,7 +200,9 @@ class MidiaPainel(models.Model):
 
 
     def __str__(self):
-        return f"{self.arquivo} - {self.setor.nome_setor}"
+        if self.tipo == "Texto":
+            return self.texto or f"Mídia {self.pk}"
+        return self.arquivo.name if self.arquivo else f"Mídia {self.pk}"
     
 
 # Painel--------------------------------------------------------------------------------------------------------------
@@ -155,6 +218,29 @@ class tb_Painel(models.Model):
     servicos_sga = JSONField("Serviços da unidade (SGA)", null=True, blank=True, help_text="Lista de IDs de serviços da unidade no SGA")
     audio_campainha = models.ForeignKey(
         AudioCampainha, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Campainha do painel", help_text="Áudio tocado quando uma senha é chamada"
+    )
+    voz_vocalizacao = models.CharField(
+        "Voz da vocalização",
+        max_length=150,
+        blank=True,
+        default="",
+        help_text="Voz instalada no navegador. Deixe em automático para usar uma voz em português.",
+    )
+    velocidade_vocalizacao = models.DecimalField(
+        "Velocidade da voz",
+        max_digits=3,
+        decimal_places=2,
+        default=0.90,
+        validators=[MinValueValidator(0.50), MaxValueValidator(2.00)],
+        help_text="Valores entre 0,50 e 2,00. O padrão é 0,90.",
+    )
+    tom_vocalizacao = models.DecimalField(
+        "Tom da voz",
+        max_digits=3,
+        decimal_places=2,
+        default=1.00,
+        validators=[MinValueValidator(0.50), MaxValueValidator(2.00)],
+        help_text="Valores entre 0,50 e 2,00. O padrão é 1,00.",
     )
     status = models.CharField("Status", max_length=8, choices=STATUS_CHOICES, default="Ativo",)
 

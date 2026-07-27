@@ -1,0 +1,42 @@
+{% extends "Administracao/Configuracoes.html" %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <a class="back-link" href="{% url 'administracao:gestao_sons' %}">← Voltar para sons</a>
+            <span class="section-label">Painel View</span>
+            <h2>Novo som</h2>
+            <p>Selecione o arquivo de áudio que será usado como campainha.</p>
+        </div>
+    </header>
+
+    <form class="connection-form sound-upload-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-field{% if form.arquivo.errors %} has-error{% endif %}">
+            <label for="{{ form.arquivo.id_for_label }}">{{ form.arquivo.label }}</label>
+            <div class="sound-upload-field">
+                <span class="sound-upload-icon" aria-hidden="true">♪</span>
+                {{ form.arquivo }}
+                <span class="help-text">
+                    Formatos permitidos: MP3, WAV, OGG, AAC e M4A. Tamanho máximo: 3 MB.
+                </span>
+            </div>
+
+            {% for error in form.arquivo.errors %}
+                <span class="field-error">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <a class="button button-secondary" href="{% url 'administracao:gestao_sons' %}">Cancelar</a>
+            <button class="button button-primary" type="submit">Cadastrar som</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

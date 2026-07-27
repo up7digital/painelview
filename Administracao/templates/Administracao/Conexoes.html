@@ -1,0 +1,60 @@
+{% extends "Administracao/Configuracoes.html" %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <span class="section-label">Novo SGA</span>
+            <h2>Conexões cadastradas</h2>
+            <p>Conexões disponíveis para comunicação com o Novo SGA.</p>
+        </div>
+        <span class="item-count">
+            {{ conexoes|length }} conex{{ conexoes|length|pluralize:"ão,ões" }}
+        </span>
+    </header>
+
+    {% if conexoes %}
+        <div class="table-wrapper">
+            <table class="management-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome da conexão</th>
+                        <th scope="col">URL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for conexao in conexoes %}
+                        <tr>
+                            <td>
+                                <a class="connection-row-link connection-name" href="{% url 'administracao:conexao_detalhes' conexao.id %}">
+                                    {{ conexao.nome_conexao }}
+                                </a>
+                            </td>
+                            <td>
+                                <a class="connection-row-link connection-url" href="{% url 'administracao:conexao_detalhes' conexao.id %}">
+                                    {{ conexao.url_origem }}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-state-icon" aria-hidden="true">↔</span>
+            <h3>Nenhuma conexão cadastrada</h3>
+            <p>As conexões adicionadas ao sistema aparecerão aqui.</p>
+        </div>
+    {% endif %}
+</section>
+
+<a
+    class="floating-add-button"
+    href="{% url 'administracao:conexao_cadastro' %}"
+    aria-label="Cadastrar nova conexão"
+    title="Cadastrar nova conexão"
+>
+    <span aria-hidden="true">+</span>
+</a>
+{% endblock %}

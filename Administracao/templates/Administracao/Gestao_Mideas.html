@@ -1,0 +1,95 @@
+{% extends "Administracao/Configuracoes.html" %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <span class="section-label">Painel View</span>
+            <h2>Mídias painel</h2>
+            <p>Arquivos e conteúdos disponíveis para exibição nos painéis.</p>
+        </div>
+        <span class="item-count">
+            {{ midias|length }} mídi{{ midias|length|pluralize:"a,as" }}
+        </span>
+    </header>
+
+    {% if messages %}
+        <div class="messages" aria-live="polite">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if midias %}
+        <div class="table-wrapper">
+            <table class="management-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Mídia</th>
+                        <th scope="col">Formato</th>
+                        <th scope="col">Ordem</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for midia in midias %}
+                        <tr>
+                            <td>
+                                {% if midia.arquivo %}
+                                    <a class="media-row-link media-path" href="{% url 'administracao:midia_detalhada' midia.id %}" title="{{ midia.nome_arquivo }}">
+                                        {{ midia.nome_arquivo }}
+                                    </a>
+                                {% else %}
+                                    <a class="media-row-link media-path media-text" href="{% url 'administracao:midia_detalhada' midia.id %}" title="{{ midia.texto }}">
+                                        {{ midia.texto|default:"Sem conteúdo" }}
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="media-row-link" href="{% url 'administracao:midia_detalhada' midia.id %}">
+                                    <span class="media-type-badge">{{ midia.get_tipo_display }}</span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="media-row-link" href="{% url 'administracao:midia_detalhada' midia.id %}">
+                                    <span class="media-order">{{ midia.ordem }}</span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="media-row-link" href="{% url 'administracao:midia_detalhada' midia.id %}">
+                                    {% if midia.ativo %}
+                                        <span class="status-badge status-ativo">Ativa</span>
+                                    {% else %}
+                                        <span class="status-badge status-inativo">Inativa</span>
+                                    {% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-state-icon" aria-hidden="true">▧</span>
+            {% if eh_admin or setores_usuario %}
+                <h3>Nenhuma mídia cadastrada</h3>
+                <p>As mídias vinculadas aos setores permitidos aparecerão aqui.</p>
+            {% else %}
+                <h3>Usuário sem setor</h3>
+                <p>Vincule um setor ao seu usuário para visualizar e cadastrar mídias.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+
+<a
+    class="floating-add-button"
+    href="{% url 'administracao:midia_cadastro' %}"
+    aria-label="Cadastrar nova mídia"
+    title="Cadastrar nova mídia"
+>
+    <span aria-hidden="true">+</span>
+</a>
+{% endblock %}

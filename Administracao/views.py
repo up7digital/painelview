@@ -2,13 +2,13 @@
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.contrib.admin.views.decorators import staff_member_required
+from .Views.login import active_user_required
 
 from .models import tb_Conexoes # Certifique-se que o path está correto
 from .utils.sga_client import SGAClient # Certifique-se que o path está correto
 
 
-@staff_member_required
+@active_user_required
 def ajax_carregar_unidades(request):
     """
     Carrega as unidades do SGA via AJAX com base na conexão selecionada.
@@ -35,7 +35,7 @@ def ajax_carregar_unidades(request):
         return JsonResponse({'unidades': [], 'error': str(e)}, status=500)
 
 
-@staff_member_required
+@active_user_required
 def ajax_carregar_servicos(request):
     """
     Carrega os serviços do SGA via AJAX com base na unidade selecionada.

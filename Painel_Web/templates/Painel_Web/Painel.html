@@ -14,7 +14,7 @@
 
     <link rel="stylesheet" href="{% url 'personalizacao_css' %}">
     <link rel="stylesheet" href="{% static 'Painel_Web/css/style_modelo_painel.css' %}">
-    <link rel="stylesheet" href="{% static 'Painel_Web/css/style_painel.css' %}">
+    <link rel="stylesheet" href="{% static 'Painel_Web/css/style_painel.css' %}?v=1.2.1">
 
     <title>Painel de Senhas</title>
 </head>
@@ -33,16 +33,24 @@
 </body>
 
 <script>window.PAINEL_ID = {{ painel.id }}</script>
-<script src="{% static 'js/script.js' %}"></script>
-<script src="{% static 'js/mecanismos_interacao.js' %}"></script>
+{{ vocalizacao_config|json_script:"vocalizacao-config" }}
 <script>
-    const TEMPO_IMAGEM = {{ config.tempo_exibicao_imagem|default:5 }} * 1000;
-    const TEMPO_TELA_DESCANSO = {{ config.tempo_popup|default:10 }} * 1000;
+    window.VOCALIZACAO_CONFIG = JSON.parse(
+        document.getElementById("vocalizacao-config").textContent
+    );
 </script>
-
+<script
+    src="https://unpkg.com/talkify-tts@4.0.0/dist/talkify.min.js"
+    onerror="console.error('🔇 Falha ao carregar a biblioteca Talkify.')"
+></script>
+<script src="{% static 'js/vocalizacao.js' %}?v=1.2.1"></script>
+<script src="{% static 'js/script.js' %}?v=1.3.3"></script>
 <script>
-// Controle de atualização dos slides =================================
-const socket = new WebSocket("ws://" + window.location.host + "/ws/painel/");
-
+    window.TEMPO_IMAGEM = {{ config.tempo_exibicao_imagem|default:5 }} * 1000;
+    window.TEMPO_TELA_DESCANSO = {{ config.tempo_popup|default:10 }} * 1000;
+    window.INTERVALO_ATUALIZACAO_MIDIAS = 10000;
+    window.URL_MIDIAS_PAINEL = "/painel-midias/";
+</script>
+<script src="{% static 'js/mecanismos_interacao.js' %}?v=2.0.0"></script>
 
 </html>

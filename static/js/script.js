@@ -1,208 +1,365 @@
-let ultimaSenha = null;
-let paginaJaAtualizouPorErro = false;
+let ultimaAssinaturaRecebida = "";
+let ultimoIdChamada = null;
+let atualizacaoEmAndamento = false;
+let atualizacaoForcadaPendente = false;
+let eventoIdPendente = null;
+let chamadaEmExecucao = false;
 
+const filaChamadas = [];
+const idsNaFila = new Set();
 
-console.log("===== Versão do Script: 1.2.0 =====");
+console.log("===== Versão do Script: 1.3.1 =====");
 
-// 1) INICIAR CONEXÃO COM MERCURE
-console.log("🔌 Iniciando conexão Mercure via proxy...");
-console.log("URL usada:", `/mercure-proxy/${window.PAINEL_ID}/`);
+function normalizarAssinatura(valor) {
+    return String(valor ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+}
 
-const evtSource = new EventSource(`/mercure-proxy/${window.PAINEL_ID}/`);
-
-evtSource.onerror = function(err) {
-    console.error("🔴 ERRO SSE:", err);
-
-    // Se o servidor deu timeout, quebra inevitável
-    if (err && err.target && err.target.readyState === EventSource.CLOSED) {
-        console.warn("🔌 Conexão SSE fechada pelo servidor");
+function criarAssinaturaChamada(chamada) {
+    if (!chamada?.senha) {
+        return "";
     }
 
-    if (!paginaJaAtualizouPorErro) {
-        paginaJaAtualizouPorErro = true;
+    const destino = chamada.textoLocal || [
+        chamada.local,
+        chamada.numeroLocal,
+    ].filter(
+        (valor) => valor !== null && valor !== undefined && valor !== "",
+    ).join(" ");
 
-        console.warn("🔄 Reload por erro SSE...");
-        setTimeout(() => location.reload(), 1500);
-    }
-};
+    return [
+        normalizarAssinatura(chamada.senha),
+        normalizarAssinatura(destino),
+    ].join("|");
+}
 
+function obterIdChamada(chamada) {
+    const id = Number(chamada?.id);
+    return Number.isFinite(id) && id > 0 ? id : null;
+}
 
-// RECEBEU EVENTO MERCURE
-evtSource.onmessage = function(event) {
-    let data;
-    try {
-        data = JSON.parse(event.data);
-        console.log("🟢 JSON PARSE OK:", data);
-    } catch (err) {
-        console.error("❌ ERRO PARSE JSON:", err, "DATA:", event.data);
+function atualizarHistorico(historico) {
+    if (!Array.isArray(historico)) {
         return;
     }
 
-
-    // 1) HTML pronto
-    if (data.html) {
-        try {
-            document.getElementById("area-exibicao_senhas").innerHTML = data.html;
-        } catch (err) {
-            console.error("❌ ERRO ao aplicar HTML:", err);
-        }
-
-        const el = document.querySelector(".senha-atual_exbicao");
-        if (el) {
-            mostrarSenhaComCampainha(el);
-            resetarTimerTelaDescanso();
-
-        } else {
-            console.warn("⚠️ HTML não contém '.senha-atual_exbicao'");
-        }
+    const lista = document.querySelector(".historico-lista");
+    if (!lista) {
         return;
     }
 
-    // 2) evento de ID → buscar dados completos
-    if (data.id) {
-        atualizarPainel();
-        return;
+    lista.replaceChildren();
+
+    historico.slice(0, 7).forEach((item) => {
+        const linha = document.createElement("li");
+        const senha = document.createElement("span");
+        const local = document.createElement("span");
+
+        linha.className = "historico-senhas";
+        senha.className = "historico-senha_atual";
+        senha.textContent = item.senha;
+        local.className = "hist-local";
+        local.textContent = `${item.local || "Guichê"} ${item.numeroLocal ?? ""}`;
+
+        linha.append(senha, local);
+        lista.appendChild(linha);
+    });
+}
+
+function atualizarExibicaoChamada(chamada) {
+    const senha = document.querySelector(".senha-atual_exbicao");
+    const nomeCliente = document.querySelector(".detalhes-atual_cliente");
+    const local = document.querySelector(".detalhes-atual_local");
+    const prioridade = document.querySelector(".detalhes-atual_prioridade");
+
+    if (!senha) {
+        throw new Error("Elemento da senha atual não encontrado.");
     }
 
-    // 3) dados de senha_atual
-    if (!data.senha_atual) {
-        console.warn("⚠️ Evento sem senha_atual. Ignorado.", data);
-        return;
-    }
+    senha.textContent = chamada.senha;
+    senha.dataset.chamadaId = chamada.id || "";
 
+    if (nomeCliente) {
+        const nome = String(chamada.nomeCliente ?? "").trim();
+        nomeCliente.textContent = nome;
+        nomeCliente.hidden = !nome;
+        nomeCliente.classList.remove(
+            "color_convencional",
+            "color_prioridade",
+        );
 
-    const elSenha = document.querySelector(".senha-atual_exbicao");
-    if (!elSenha) {
-        console.error("❌ Elemento .senha-atual_exbicao NÃO encontrado!");
-    } else {
-        elSenha.innerText = data.senha_atual.senha;
-
-        const local = document.querySelector(".detalhes-atual_local");
-        const prioridade = document.querySelector(".detalhes-atual_prioridade");
-
-        if (local) {
-            local.innerText = "Local: " + data.senha_atual.local + " " + data.senha_atual.numeroLocal;
-        } else {
-            console.warn("⚠️ '.detalhes-atual_local' NÃO encontrado!");
+        if (chamada.prioridade === "Normal") {
+            nomeCliente.classList.add("color_convencional");
+        } else if (chamada.prioridade === "Prioridade") {
+            nomeCliente.classList.add("color_prioridade");
         }
-
-        if (prioridade) {
-            prioridade.innerText = data.senha_atual.prioridade;
-        } else {
-            console.warn("⚠️ '.detalhes-atual_prioridade' NÃO encontrado!");
-        }
-
-        mostrarSenhaComCampainha(elSenha);
     }
 
-    // 4) Atualizar histórico
-    if (Array.isArray(data.historico)) {
+    senha.classList.remove("color_convencional", "color_prioridade");
 
-        const ulHist = document.querySelector(".historico-lista");
-        if (!ulHist) {
-            console.error("❌ '.historico-lista' NÃO encontrado!");
-        } else {
-            ulHist.innerHTML = "";
-            data.historico.slice(0, 5).forEach(item => {
-                const li = document.createElement("li");
-                li.className = "historico-senhas";
-                li.innerHTML = `
-                    <span class="historico-senha_atual">${item.senha}</span>
-                    <span class="hist-local">Guichê ${item.numeroLocal}</span>`;
-                ulHist.appendChild(li);
+    if (chamada.prioridade === "Normal") {
+        senha.classList.add("color_convencional");
+    } else if (chamada.prioridade === "Prioridade") {
+        senha.classList.add("color_prioridade");
+    }
+
+    if (local) {
+        const textoLocal = chamada.textoLocal
+            || [chamada.local, chamada.numeroLocal].filter(
+                (valor) => valor !== null
+                    && valor !== undefined
+                    && valor !== "",
+            ).join(" ");
+        local.textContent = textoLocal ? `Local: ${textoLocal}` : "";
+    }
+
+    if (prioridade) {
+        prioridade.textContent = chamada.prioridade || "";
+        prioridade.classList.remove("color_convencional", "color_prioridade");
+
+        if (chamada.prioridade === "Normal") {
+            prioridade.classList.add("color_convencional");
+        } else if (chamada.prioridade === "Prioridade") {
+            prioridade.classList.add("color_prioridade");
+        }
+    }
+
+    senha.classList.remove("piscar");
+    void senha.offsetWidth;
+    senha.classList.add("piscar");
+}
+
+function tocarCampainha() {
+    const audio = document.getElementById("audio-campainha");
+    if (!audio || !audio.currentSrc) {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+        let finalizado = false;
+
+        const finalizar = () => {
+            if (finalizado) {
+                return;
+            }
+            finalizado = true;
+            audio.removeEventListener("ended", finalizar);
+            audio.removeEventListener("error", finalizar);
+            resolve();
+        };
+
+        audio.pause();
+        audio.currentTime = 0;
+        audio.addEventListener("ended", finalizar, { once: true });
+        audio.addEventListener("error", finalizar, { once: true });
+
+        const reproducao = audio.play();
+        if (reproducao?.catch) {
+            reproducao.catch((erro) => {
+                console.warn("⚠️ Autoplay da campainha bloqueado:", erro);
+                finalizar();
             });
         }
-    } else {
-        console.warn("⚠️ Historico não veio como array!", data.historico);
+
+        window.setTimeout(finalizar, 10000);
+    });
+}
+
+async function processarFilaChamadas() {
+    if (chamadaEmExecucao || filaChamadas.length === 0) {
+        return;
+    }
+
+    chamadaEmExecucao = true;
+    const chamada = filaChamadas.shift();
+    const id = obterIdChamada(chamada);
+
+    try {
+        atualizarExibicaoChamada(chamada);
+        resetarTimerTelaDescanso();
+
+        console.log(
+            `🔔 Executando chamada ${chamada.senha}. Restantes na fila: ${filaChamadas.length}.`,
+        );
+
+        const campainha = tocarCampainha();
+        const vocalizacao = window.VocalizacaoPainel?.vocalizar(chamada)
+            || Promise.resolve();
+
+        await Promise.allSettled([campainha, vocalizacao]);
+        console.log(`✅ Chamada ${chamada.senha} concluída.`);
+    } catch (erro) {
+        console.error("❌ Erro ao executar chamada da fila:", erro);
+    } finally {
+        if (id) {
+            idsNaFila.delete(id);
+        }
+        chamadaEmExecucao = false;
+        processarFilaChamadas();
+    }
+}
+
+function enfileirarChamada(chamada) {
+    if (!chamada?.senha) {
+        return;
+    }
+
+    const id = obterIdChamada(chamada);
+    if (id && idsNaFila.has(id)) {
+        return;
+    }
+
+    if (id) {
+        idsNaFila.add(id);
+        ultimoIdChamada = Math.max(ultimoIdChamada || 0, id);
+    }
+
+    ultimaAssinaturaRecebida = criarAssinaturaChamada(chamada);
+    filaChamadas.push({...chamada});
+
+    console.log(
+        `➕ Chamada ${chamada.senha} adicionada à fila. Total: ${filaChamadas.length}.`,
+    );
+    processarFilaChamadas();
+}
+
+function enfileirarNovasChamadas(data, forcarChamada, eventoId) {
+    const chamadas = Array.isArray(data.chamadas) ? data.chamadas : [];
+    const novasChamadas = chamadas
+        .filter((chamada) => {
+            const id = obterIdChamada(chamada);
+            return id && (!ultimoIdChamada || id > ultimoIdChamada);
+        })
+        .sort((chamadaA, chamadaB) => (
+            obterIdChamada(chamadaA) - obterIdChamada(chamadaB)
+        ));
+
+    if (novasChamadas.length) {
+        novasChamadas.forEach(enfileirarChamada);
+        return;
+    }
+
+    if (!data.senha_atual) {
+        return;
+    }
+
+    const idEvento = Number(eventoId);
+    const eventoJaRecebido = Number.isFinite(idEvento)
+        && ultimoIdChamada
+        && idEvento <= ultimoIdChamada;
+
+    const assinatura = criarAssinaturaChamada(data.senha_atual);
+    const chamadaMudou = assinatura
+        && assinatura !== ultimaAssinaturaRecebida;
+
+    if ((forcarChamada && !eventoJaRecebido) || chamadaMudou) {
+        enfileirarChamada(data.senha_atual);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const senhaInicial = document.querySelector(".senha-atual_exbicao");
+    const localInicial = document.querySelector(".detalhes-atual_local");
+
+    ultimoIdChamada = obterIdChamada({
+        id: senhaInicial?.dataset.chamadaId,
+    });
+    ultimaAssinaturaRecebida = criarAssinaturaChamada({
+        senha: senhaInicial?.textContent,
+        textoLocal: localInicial?.textContent.replace(/^Local:\s*/i, ""),
+    });
+
+    window.setInterval(() => atualizarPainel(false), 3000);
+});
+
+console.log("🔌 Iniciando conexão Mercure via proxy...");
+const evtSource = new EventSource(`/mercure-proxy/${window.PAINEL_ID}/`);
+
+evtSource.onerror = function (erro) {
+    console.error("🔴 ERRO SSE:", erro);
+    console.warn(
+        "🔄 O EventSource tentará reconectar; a fila atual será preservada.",
+    );
+};
+
+evtSource.onmessage = function (event) {
+    let data;
+
+    try {
+        data = JSON.parse(event.data);
+    } catch (erro) {
+        console.error("❌ Evento Mercure com JSON inválido:", erro);
+        return;
+    }
+
+    if (data.html) {
+        const documento = new DOMParser().parseFromString(
+            data.html,
+            "text/html",
+        );
+        const senha = documento.querySelector(".senha-atual_exbicao");
+        const nomeCliente = documento.querySelector(
+            ".detalhes-atual_cliente",
+        );
+        const local = documento.querySelector(".detalhes-atual_local");
+        const prioridade = documento.querySelector(
+            ".detalhes-atual_prioridade",
+        );
+
+        enfileirarChamada({
+            senha: senha?.textContent,
+            nomeCliente: nomeCliente?.textContent.trim(),
+            textoLocal: local?.textContent.replace(/^Local:\s*/i, ""),
+            prioridade: prioridade?.textContent.trim(),
+        });
+        return;
+    }
+
+    if (data.id) {
+        atualizarPainel(true, data.id);
+        return;
+    }
+
+    if (data.senha_atual) {
+        const id = obterIdChamada(data.senha_atual);
+        if (!id || !ultimoIdChamada || id > ultimoIdChamada) {
+            enfileirarChamada(data.senha_atual);
+        }
+        atualizarHistorico(data.historico);
     }
 };
 
-// FUNÇÃO DE FETCH COMPLETO
-function atualizarPainel() {
-
-    fetch(`/painel-dados/?painel=${window.PAINEL_ID}`)
-        .then(r => {
-            return r.json();
-        })
-        .then(data => {
-
-            const elSenha = document.querySelector(".senha-atual_exbicao");
-
-            if (data.senha_atual && elSenha) {
-                elSenha.innerText = data.senha_atual.senha;
-
-                // ⭐ ATUALIZA A COR DA SENHA PRINCIPAL
-                elSenha.classList.remove("color_convencional", "color_prioridade");
-
-                if (data.senha_atual.prioridade === "Normal") {
-                    elSenha.classList.add("color_convencional");
-                } else if (data.senha_atual.prioridade === "Prioridade") {
-                    elSenha.classList.add("color_prioridade");
-                }
-
-                // Atualiza local e prioridade
-                const local = document.querySelector(".detalhes-atual_local");
-                const prioridade = document.querySelector(".detalhes-atual_prioridade");
-
-                if (local)
-                    local.innerText = "Local: " + data.senha_atual.local + " " + data.senha_atual.numeroLocal;
-
-                if (prioridade) {
-                    prioridade.innerText = data.senha_atual.prioridade;
-
-                    // ⭐ ATUALIZA A COR DA PRIORIDADE
-                    prioridade.classList.remove("color_convencional", "color_prioridade");
-
-                    if (data.senha_atual.prioridade === "Normal") {
-                        prioridade.classList.add("color_convencional");
-                    } else if (data.senha_atual.prioridade === "Prioridade") {
-                        prioridade.classList.add("color_prioridade");
-                    }
-                }
-
-                mostrarSenhaComCampainha(elSenha);
-                resetarTimerTelaDescanso();
-            }
-
-            // HISTÓRICO
-            if (Array.isArray(data.historico)) {
-                const ulHist = document.querySelector(".historico-lista");
-                ulHist.innerHTML = "";
-
-                data.historico.slice(0, 7).forEach(item => {
-                    const li = document.createElement("li");
-                    li.className = "historico-senhas";
-                    li.innerHTML = `
-                        <span class="historico-senha_atual">${item.senha}</span>
-                        <span class="hist-local">Guichê ${item.numeroLocal}</span>`;
-                    ulHist.appendChild(li);
-                });
-            } else {
-                console.warn("⚠️ Historico não veio via FETCH:", data.historico);
-            }
-        })
-        .catch(err => {
-            console.error("❌ ERRO FETCH painel-dados:", err);
-        });
-}
-
-function mostrarSenhaComCampainha(el) {
-
-    // Campainha
-    const audio = document.getElementById("audio-campainha");
-
-    if (!audio) {
-        console.warn("⚠️ Nenhum audio encontrado (id='audio-campainha')");
-    } else {
-        audio.currentTime = 0;
-        audio.play().catch(err => {
-            console.warn("⚠️ Autoplay bloqueado:", err);
-        });
+function atualizarPainel(forcarChamada = true, eventoId = null) {
+    if (atualizacaoEmAndamento) {
+        atualizacaoForcadaPendente =
+            atualizacaoForcadaPendente || forcarChamada;
+        eventoIdPendente = eventoIdPendente || eventoId;
+        return;
     }
 
-    // Animação piscar
-    el.classList.remove("piscar");
-    void el.offsetWidth;
-    el.classList.add("piscar");
-}
+    atualizacaoEmAndamento = true;
 
+    fetch(`/painel-dados/?painel=${window.PAINEL_ID}`)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`Falha ao consultar painel: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            enfileirarNovasChamadas(data, forcarChamada, eventoId);
+            atualizarHistorico(data.historico);
+        })
+        .catch((erro) => {
+            console.error("❌ ERRO FETCH painel-dados:", erro);
+        })
+        .finally(() => {
+            atualizacaoEmAndamento = false;
+
+            if (atualizacaoForcadaPendente) {
+                const idPendente = eventoIdPendente;
+                atualizacaoForcadaPendente = false;
+                eventoIdPendente = null;
+                atualizarPainel(true, idPendente);
+            }
+        });
+}

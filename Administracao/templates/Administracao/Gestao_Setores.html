@@ -1,0 +1,54 @@
+{% extends "Administracao/Configuracoes.html" %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <span class="section-label">Painel View</span>
+            <h2>Gerenciar setores</h2>
+            <p>Setores disponíveis para organização dos painéis e das mídias.</p>
+        </div>
+        <span class="item-count">
+            {{ setores|length }} setor{{ setores|length|pluralize:"es" }}
+        </span>
+    </header>
+
+    {% if setores %}
+        <div class="table-wrapper">
+            <table class="management-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome do setor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for setor in setores %}
+                        <tr>
+                            <td>
+                                <a class="panel-row-link sector-name" href="{% url 'administracao:setor_detalhes' setor.id %}">
+                                    {{ setor.nome_setor|default:"Setor sem nome" }}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-state-icon" aria-hidden="true">⌂</span>
+            <h3>Nenhum setor cadastrado</h3>
+            <p>Os setores adicionados ao sistema aparecerão aqui.</p>
+        </div>
+    {% endif %}
+</section>
+
+<a
+    class="floating-add-button"
+    href="{% url 'administracao:setor_cadastro' %}"
+    aria-label="Cadastrar novo setor"
+    title="Cadastrar novo setor"
+>
+    <span aria-hidden="true">+</span>
+</a>
+{% endblock %}

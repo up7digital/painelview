@@ -1,0 +1,62 @@
+{% extends "Administracao/Configuracoes.html" %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <a class="back-link" href="{% url 'administracao:conexoes' %}">← Voltar para conexões</a>
+            <span class="section-label">Novo SGA</span>
+            {% if modo_cadastro %}
+                <h2>Nova conexão</h2>
+                <p>Informe os dados necessários para comunicação com o Novo SGA.</p>
+            {% else %}
+                <h2>{{ conexao.nome_conexao }}</h2>
+                <p>Visualize ou atualize os dados de comunicação desta conexão.</p>
+            {% endif %}
+        </div>
+        {% if not modo_cadastro %}
+            <span class="item-count">Conexão #{{ conexao.id }}</span>
+        {% endif %}
+    </header>
+
+    {% if messages %}
+        <div class="messages" aria-live="polite">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form class="connection-form" method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-grid">
+            {% for field in form %}
+                <div class="form-field{% if field.errors %} has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <span class="help-text">{{ field.help_text }}</span>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <span class="field-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <a class="button button-secondary" href="{% url 'administracao:conexoes' %}">Cancelar</a>
+            <button class="button button-primary" type="submit">
+                {% if modo_cadastro %}Cadastrar conexão{% else %}Salvar alterações{% endif %}
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

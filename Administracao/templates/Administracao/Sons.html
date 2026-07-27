@@ -1,0 +1,96 @@
+{% extends "Administracao/Configuracoes.html" %}
+{% load static %}
+
+{% block conteudo %}
+<section class="management-card">
+    <header class="management-header">
+        <div>
+            <span class="section-label">Painel View</span>
+            <h2>Sons painel</h2>
+            <p>Arquivos disponíveis para a campainha dos painéis.</p>
+        </div>
+        <span class="item-count">
+            {{ sons|length }} so{{ sons|length|pluralize:"m,ns" }}
+        </span>
+    </header>
+
+    {% if messages %}
+        <div class="messages" aria-live="polite">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if sons %}
+        <div class="table-wrapper">
+            <table class="management-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome do som</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for som in sons %}
+                        <tr>
+                            <td>
+                                <div class="sound-row">
+                                    <span class="sound-name">{{ som.nome_arquivo }}</span>
+                                    <div class="sound-actions">
+                                        <button
+                                            class="sound-play-button"
+                                            type="button"
+                                            aria-label="Reproduzir {{ som.nome_arquivo }}"
+                                            title="Reproduzir"
+                                            data-sound-button
+                                        >
+                                            <span aria-hidden="true" data-play-icon>▶</span>
+                                        </button>
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'administracao:som_excluir' som.id %}"
+                                            data-delete-sound-form
+                                            data-sound-name="{{ som.nome_arquivo }}"
+                                        >
+                                            {% csrf_token %}
+                                            <button
+                                                class="sound-delete-button"
+                                                type="submit"
+                                                aria-label="Excluir {{ som.nome_arquivo }}"
+                                                title="Excluir"
+                                            >
+                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <audio preload="none" src="{{ som.arquivo.url }}" data-sound-audio></audio>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-state-icon" aria-hidden="true">♪</span>
+            <h3>Nenhum som cadastrado</h3>
+            <p>Os sons adicionados ao sistema aparecerão aqui.</p>
+        </div>
+    {% endif %}
+</section>
+
+<a
+    class="floating-add-button"
+    href="{% url 'administracao:som_cadastro' %}"
+    aria-label="Cadastrar novo som"
+    title="Cadastrar novo som"
+>
+    <span aria-hidden="true">+</span>
+</a>
+
+<script src="{% static 'Administracao/js/sons.js' %}"></script>
+{% endblock %}
