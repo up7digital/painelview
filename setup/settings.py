@@ -1,24 +1,23 @@
 import os
-
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
-SECRET_KEY = 'Sua chave aqui'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-local-development-only")
 
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "true").strip().lower() in {"1", "true", "yes", "on"}
 
-ALLOWED_HOSTS = ["https://seudns.seudominio.br", "http://seudns.seudominio.br", "seudns.seudominio.br", "localhost", "127.0.0.1"]
-CSRF_TRUSTED_ORIGINS = [
-    "https://seudns.seudominio.br",
-    "http://seudns.seudominio.br",
-    "http://IP_do_servidor",
-    "https://IP_do_servidor",
+def env_list(name, default=""):
+    """Lê uma lista de valores separada por vírgulas do ambiente."""
+    return [value.strip() for value in os.getenv(name, default).split(",") if value.strip()]
 
-]
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+
+if not DEBUG and not os.getenv("DJANGO_SECRET_KEY"):
+    raise RuntimeError("Defina DJANGO_SECRET_KEY no ambiente quando DEBUG estiver desativado.")
 
 
 INSTALLED_APPS = [
@@ -28,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'Administracao',
     'Painel_Web',
 ]
@@ -93,7 +93,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = os.getenv("DJANGO_TIME_ZONE", "America/Fortaleza")
 
 USE_I18N = True
 

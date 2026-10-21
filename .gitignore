@@ -11,9 +11,11 @@ __pycache__/
 # Ambiente virtual
 venv/
 env/
+.env
 .env/
 *.env
 *.venv
+!.env.example
 
 # Django
 db.sqlite3
