@@ -1,4 +1,4 @@
-# Painel View
+# Painel View — Painel de Senhas para Novo SGA
 
 Painel de exibição de senhas integrado ao Novo SGA. O projeto tem duas áreas principais:
 
